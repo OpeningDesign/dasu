@@ -529,7 +529,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="about-logo">
           <div class="name">Dasu<em>.</em>print</div>
           <div><span class="about-badge">ALPHA</span></div>
-          <div class="about-ver">Version 0.3.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
+          <div class="about-ver">Version 0.2.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
         </div>
         <div class="about-body">
           <p>A free, open-source browser-based sheet layout tool — compose drawings from <a href="https://bonsaibim.org" target="_blank">Bonsai BIM</a>, SVG views, and images into print-ready sheets without leaving the browser.</p>
@@ -1346,6 +1346,23 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
         </div>
 
+        <!-- ── Bonsai SVG ── -->
+        <div class="prop-grp ctx-sec" id="ctx-bonsai">
+          <div class="prop-lbl">Bonsai BIM Drawing</div>
+          <div style="font-size:11px;color:var(--accent);margin-bottom:6px" id="ctx-bonsai-scale">—</div>
+          <button class="p-btn" style="width:100%" onclick="openBonsaiStyleManager()">
+            ⬡ Style Manager…
+          </button>
+        </div>
+
+        <div class="prop-grp ctx-sec" id="ctx-dxf">
+          <div class="prop-lbl">DXF Layers</div>
+          <div style="font-size:11px;color:var(--txt2);margin-bottom:6px" id="ctx-dxf-info">—</div>
+          <button class="p-btn" style="width:100%" onclick="openDxfLayerManager()">
+            ⊞ Layer Manager…
+          </button>
+        </div>
+
         <div class="prop-grp">
           <div class="btn-row">
             <button class="p-btn" id="lock-btn" onclick="toggleLock()">Lock</button>
@@ -1358,6 +1375,94 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
     </div>
 
+  </div>
+
+  <!-- Bonsai SVG Style Manager Modal -->
+  <div class="modal-overlay" id="modal-bonsai-style" onclick="closeOnOverlay(event,'modal-bonsai-style')">
+    <div class="modal wide">
+      <div class="modal-hdr">
+        <h2>Bonsai SVG Style Manager</h2>
+        <button class="modal-close" onclick="closeModal('modal-bonsai-style')">×</button>
+      </div>
+      <div class="modal-body">
+
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:14px" id="bonsai-style-filename">—</div>
+
+        <!-- Presets -->
+        <div class="pref-sec-lbl">Presets</div>
+        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="m-btn" onclick="applyBonsaiPreset('nz')">NZ Drawing Standard</button>
+          <button class="m-btn" onclick="applyBonsaiPreset('greyscale')">Greyscale Print</button>
+          <button class="m-btn" onclick="applyBonsaiPreset('colour')">Colour by Class</button>
+          <button class="m-btn" onclick="applyBonsaiPreset('reset')">Reset to Original</button>
+        </div>
+
+        <!-- Class table -->
+        <div class="pref-sec-lbl">CSS Classes</div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px 50px;gap:4px 8px;
+          align-items:center;margin-bottom:4px;padding:0 4px">
+          <span style="font-size:10px;color:var(--txt2)">Class</span>
+          <span style="font-size:10px;color:var(--txt2)">Colour</span>
+          <span style="font-size:10px;color:var(--txt2)">LW (mm)</span>
+          <span style="font-size:10px;color:var(--txt2)">Vis</span>
+        </div>
+        <div id="bonsai-style-rows" style="max-height:380px;overflow-y:auto;
+          border:1px solid var(--bdr);border-radius:6px;padding:4px"></div>
+
+      </div>
+      <div class="modal-footer" style="gap:8px">
+        <button class="m-btn" onclick="closeModal('modal-bonsai-style')">Cancel</button>
+        <button class="m-btn primary" onclick="applyBonsaiStyleManager()">Apply &amp; Redraw</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DXF Layer Manager Modal -->
+  <div class="modal-overlay" id="modal-dxf-layers" onclick="closeOnOverlay(event,'modal-dxf-layers')">
+    <div class="modal wide">
+      <div class="modal-hdr">
+        <h2>DXF Layer Manager</h2>
+        <button class="modal-close" onclick="closeModal('modal-dxf-layers')">×</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Presets -->
+        <div class="pref-sec-lbl">Presets</div>
+        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="m-btn" onclick="applyDxfPreset('nz')">NZ Drawing Standard</button>
+          <button class="m-btn" onclick="applyDxfPreset('greyscale')">Greyscale Print</button>
+          <button class="m-btn" onclick="applyDxfPreset('reset')">Reset All</button>
+        </div>
+
+        <!-- Global lineweight scale -->
+        <div class="pref-row" style="margin-bottom:12px">
+          <div>
+            <div class="pref-row-lbl">Global lineweight scale</div>
+            <div class="pref-row-sub">Multiplies all lineweights in the drawing</div>
+          </div>
+          <div class="pref-ctrl" style="display:flex;align-items:center;gap:6px">
+            <input class="pref-inp" id="dxf-lw-scale" type="number" value="1.0" min="0.1" max="10" step="0.1" style="width:60px">
+            <span style="font-size:11px;color:var(--txt2)">×</span>
+          </div>
+        </div>
+
+        <!-- Layer table -->
+        <div class="pref-sec-lbl">Layers</div>
+        <div style="display:grid;grid-template-columns:auto 1fr 80px 80px 50px;gap:4px 8px;align-items:center;margin-bottom:4px;padding:0 2px">
+          <span style="font-size:10px;color:var(--txt2)">Vis</span>
+          <span style="font-size:10px;color:var(--txt2)">Layer Name</span>
+          <span style="font-size:10px;color:var(--txt2)">Colour</span>
+          <span style="font-size:10px;color:var(--txt2)">LW (mm)</span>
+          <span style="font-size:10px;color:var(--txt2)">Frozen</span>
+        </div>
+        <div id="dxf-layer-rows" style="max-height:320px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;padding:4px"></div>
+
+      </div>
+      <div class="modal-footer" style="gap:8px">
+        <button class="m-btn" onclick="closeModal('modal-dxf-layers')">Cancel</button>
+        <button class="m-btn primary" onclick="applyDxfLayerManager()">Apply & Redraw</button>
+      </div>
+    </div>
   </div>
 
   <!-- Statusbar -->
@@ -2266,16 +2371,33 @@ function loadFile(file, pos) {
     reader.readAsDataURL(file);
   } else if (ext === 'svg') {
     reader.onload = ev => {
-      fabric.loadSVGFromString(ev.target.result, (objs, opts) => {
+      const svgStr = ev.target.result;
+      fabric.loadSVGFromString(svgStr, (objs, opts) => {
         if (!objs || !objs.length) return;
         const grp = fabric.util.groupSVGElements(objs, opts);
-        // Try to read viewBox to determine if already mm-scaled
-        const vbm = ev.target.result.match(/viewBox=["'][\d.\s-]+["']/);
-        grp._fileName = file.name;
+
+        grp._fileName  = file.name;
+        grp._rawSvg    = svgStr;
+        grp._annotType = 'drawing';
+
+        // ── Auto-read data-scale from Bonsai SVG ─────────────────────────
+        const scaleMatch = svgStr.match(/data-scale=["'](\d+):(\d+)["']/);
+        if (scaleMatch) {
+          const scaleDenom = parseInt(scaleMatch[2]);
+          grp._drawingScale  = scaleDenom;
+          grp._isBonsaiSvg   = true;
+        }
+
+        // ── Detect ifc: namespace ─────────────────────────────────────────
+        if (svgStr.includes('xmlns:ifc=') || svgStr.includes('ifc:')) {
+          grp._isBonsaiSvg = true;
+        }
+
         pos ? grp.set({ left: pos.x, top: pos.y }) : centerObj(grp);
         canvas.add(grp);
         canvas.setActiveObject(grp);
         canvas.requestRenderAll();
+        syncProps(grp);
       });
     };
     reader.readAsText(file);
@@ -2529,6 +2651,523 @@ async function installEzdxf() {
   btn.style.pointerEvents = 'auto';
 }
 
+// ── Bonsai SVG Style Manager ──────────────────────────────────────────────────
+
+let _bonsaiStyleTarget = null;
+
+// NZ Drawing Standard class map
+const NZ_BONSAI_STYLES = {
+  'cut':                    { stroke: '#000000', strokeWidth: 0.35 },
+  'projection':             { stroke: '#000000', strokeWidth: 0.25 },
+  'annotation':             { stroke: '#000000', strokeWidth: 0.18 },
+  'IfcAnnotation':          { stroke: '#000000', strokeWidth: 0.18 },
+  'IfcWall':                { stroke: '#000000', strokeWidth: 0.35 },
+  'IfcSlab':                { stroke: '#000000', strokeWidth: 0.35 },
+  'IfcColumn':              { stroke: '#000000', strokeWidth: 0.35 },
+  'IfcBeam':                { stroke: '#000000', strokeWidth: 0.35 },
+  'IfcDoor':                { stroke: '#000000', strokeWidth: 0.25 },
+  'IfcWindow':              { stroke: '#000000', strokeWidth: 0.25 },
+  'IfcStair':               { stroke: '#000000', strokeWidth: 0.25 },
+  'IfcRoof':                { stroke: '#000000', strokeWidth: 0.25 },
+  'IfcSpace':               { stroke: 'none',    strokeWidth: 0,    fill: 'none' },
+  'IfcGeographicElement':   { stroke: '#000000', strokeWidth: 0.18 },
+  'PredefinedType-LINEWORK':{ stroke: '#000000', strokeWidth: 0.25 },
+  'PredefinedType-GRID':    { stroke: '#777777', strokeWidth: 0.18 },
+  'PredefinedType-DIMENSION':{ stroke: '#000000', strokeWidth: 0.18 },
+  'PredefinedType-TEXT':    { stroke: 'none',    strokeWidth: 0 },
+  'PredefinedType-BACKGROUND':{ stroke: '#000000', strokeWidth: 0.13 },
+  'surface':                { fill: '#ffffff',   stroke: 'none', strokeWidth: 0 },
+};
+
+// Colour by IFC class for visual review
+const COLOUR_BONSAI_STYLES = {
+  'cut':             { stroke: '#1a1a1a', strokeWidth: 0.35 },
+  'IfcWall':         { stroke: '#cc4400', strokeWidth: 0.35 },
+  'IfcSlab':         { stroke: '#884400', strokeWidth: 0.35 },
+  'IfcColumn':       { stroke: '#cc0044', strokeWidth: 0.35 },
+  'IfcDoor':         { stroke: '#0055cc', strokeWidth: 0.25 },
+  'IfcWindow':       { stroke: '#0099cc', strokeWidth: 0.25 },
+  'IfcStair':        { stroke: '#9900cc', strokeWidth: 0.25 },
+  'IfcRoof':         { stroke: '#cc8800', strokeWidth: 0.25 },
+  'IfcSpace':        { stroke: 'none',    strokeWidth: 0,   fill: 'none' },
+  'projection':      { stroke: '#555555', strokeWidth: 0.18 },
+  'annotation':      { stroke: '#000000', strokeWidth: 0.18 },
+  'PredefinedType-GRID': { stroke: '#008800', strokeWidth: 0.18 },
+  'PredefinedType-DIMENSION': { stroke: '#0000aa', strokeWidth: 0.18 },
+};
+
+function _parseBonsaiCssClasses(svgStr) {
+  // Extract the CSS style block and parse class rules
+  const styleMatch = svgStr.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+  if (!styleMatch) return [];
+
+  let css = styleMatch[1];
+  // Strip CDATA wrapper
+  css = css.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
+  // Strip comments
+  css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const classes = [];
+  const seen    = new Set();
+
+  // Match .classname { ... } blocks
+  const ruleRe = /\.([a-zA-Z][\w-]*)(?:\.[a-zA-Z][\w-]*)?\s*\{([^}]*)\}/g;
+  let match;
+  while ((match = ruleRe.exec(css)) !== null) {
+    const name  = match[1];
+    const body  = match[2];
+    if (seen.has(name)) continue;
+    seen.add(name);
+
+    // Skip purely internal/non-visual classes
+    if (['material-blank','material-diagonal1','material-diagonal2',
+         'material-diagonal3','material-crosshatch1','material-crosshatch2',
+         'material-crosshatch3','material-brick','material-earth','material-glass',
+         'material-liquid','material-grass','material-honeycomb','material-sand',
+         'material-concrete'].includes(name)) continue;
+
+    const strokeMatch = body.match(/stroke\s*:\s*([^;]+)/);
+    const swMatch     = body.match(/stroke-width\s*:\s*([\d.]+)/);
+    const fillMatch   = body.match(/fill\s*:\s*([^;]+)/);
+
+    const stroke = strokeMatch ? strokeMatch[1].trim() : null;
+    const sw     = swMatch     ? parseFloat(swMatch[1]) : null;
+    const fill   = fillMatch   ? fillMatch[1].trim()   : null;
+
+    classes.push({ name, stroke, strokeWidth: sw, fill, _orig: { stroke, strokeWidth: sw, fill } });
+  }
+
+  return classes;
+}
+
+function openBonsaiStyleManager() {
+  const o = canvas.getActiveObject();
+  if (!o || !o._isBonsaiSvg || !o._rawSvg) return;
+  _bonsaiStyleTarget = o;
+
+  document.getElementById('bonsai-style-filename').textContent =
+    `${o._fileName || 'Bonsai SVG'}  ·  Scale 1:${o._drawingScale || '?'}`;
+
+  // Parse or restore saved overrides
+  const classes  = _parseBonsaiCssClasses(o._rawSvg);
+  const saved    = o._bonsaiStyleMap || {};
+
+  const rows = document.getElementById('bonsai-style-rows');
+  rows.innerHTML = '';
+
+  if (!classes.length) {
+    rows.innerHTML = '<div style="padding:12px;color:var(--txt2);font-size:12px">No CSS class definitions found in this SVG.</div>';
+  } else {
+    classes.forEach(cls => {
+      const ov      = saved[cls.name] || {};
+      const stroke  = ov.stroke      !== undefined ? ov.stroke      : (cls.stroke || '#000000');
+      const sw      = ov.strokeWidth !== undefined ? ov.strokeWidth : (cls.strokeWidth ?? 0.25);
+      const visible = ov.visible     !== undefined ? ov.visible     : true;
+      const isNone  = stroke === 'none' || stroke === '';
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 80px 50px;gap:4px 8px;align-items:center;padding:5px 6px;border-radius:4px';
+      row.innerHTML = `
+        <span style="font-size:11px;font-family:var(--mono);color:var(--txt);overflow:hidden;
+          text-overflow:ellipsis;white-space:nowrap" title="${cls.name}">${cls.name}</span>
+        <div class="colour-well" style="height:22px">
+          <input type="color" data-cls="${cls.name}" class="bonsai-col-inp"
+            value="${_ensureHex(isNone ? '#000000' : stroke)}"
+            style="width:100%;height:100%;${isNone ? 'opacity:0.3' : ''}">
+        </div>
+        <input type="number" data-cls="${cls.name}" class="bonsai-lw-inp p-inp"
+          value="${sw.toFixed(2)}" min="0" max="5" step="0.05" style="width:100%">
+        <label class="toggle-sw" style="transform:scale(0.75);transform-origin:center">
+          <input type="checkbox" data-cls="${cls.name}" class="bonsai-vis-chk" ${visible ? 'checked' : ''}>
+          <span class="knob"></span>
+        </label>
+      `;
+      rows.appendChild(row);
+    });
+  }
+
+  openModal('modal-bonsai-style');
+}
+
+function applyBonsaiPreset(preset) {
+  const rows = document.querySelectorAll('#bonsai-style-rows > div');
+  rows.forEach(row => {
+    const nameEl = row.querySelector('[data-cls]');
+    if (!nameEl) return;
+    const name   = nameEl.dataset.cls;
+    const colInp = row.querySelector('.bonsai-col-inp');
+    const lwInp  = row.querySelector('.bonsai-lw-inp');
+    const visChk = row.querySelector('.bonsai-vis-chk');
+    if (!colInp || !lwInp || !visChk) return;
+
+    if (preset === 'nz') {
+      const s = NZ_BONSAI_STYLES[name];
+      if (s) {
+        if (s.stroke && s.stroke !== 'none') colInp.value = s.stroke;
+        lwInp.value    = (s.strokeWidth || 0).toFixed(2);
+        visChk.checked = true;
+      }
+    } else if (preset === 'greyscale') {
+      colInp.value   = '#555555';
+      lwInp.value    = '0.18';
+      visChk.checked = true;
+    } else if (preset === 'colour') {
+      const s = COLOUR_BONSAI_STYLES[name];
+      if (s && s.stroke && s.stroke !== 'none') colInp.value = s.stroke;
+      if (s) lwInp.value = (s.strokeWidth || 0.18).toFixed(2);
+      visChk.checked = true;
+    } else if (preset === 'reset') {
+      // Restore from parsed originals — re-parse
+      const o = _bonsaiStyleTarget;
+      if (o) {
+        const classes = _parseBonsaiCssClasses(o._rawSvg);
+        const cls     = classes.find(c => c.name === name);
+        if (cls) {
+          colInp.value   = _ensureHex(cls._orig.stroke || '#000000');
+          lwInp.value    = (cls._orig.strokeWidth ?? 0.25).toFixed(2);
+          visChk.checked = true;
+        }
+      }
+    }
+  });
+}
+
+function applyBonsaiStyleManager() {
+  const o = _bonsaiStyleTarget;
+  if (!o || !o._rawSvg) {
+    alert('No raw SVG stored — re-import to use the style manager.');
+    closeModal('modal-bonsai-style');
+    return;
+  }
+
+  // Collect overrides from UI
+  const map = {};
+  document.querySelectorAll('#bonsai-style-rows > div').forEach(row => {
+    const nameEl = row.querySelector('[data-cls]');
+    if (!nameEl) return;
+    const name    = nameEl.dataset.cls;
+    const stroke  = row.querySelector('.bonsai-col-inp')?.value  || '#000000';
+    const sw      = parseFloat(row.querySelector('.bonsai-lw-inp')?.value) || 0;
+    const visible = row.querySelector('.bonsai-vis-chk')?.checked !== false;
+    map[name] = { stroke, strokeWidth: sw, visible };
+  });
+
+  o._bonsaiStyleMap = map;
+
+  // Rewrite the CSS style block
+  const newSvg = _applyBonsaiStyleMap(o._rawSvg, map);
+
+  // Save position/scale/crop before any canvas changes
+  const savedLeft   = o.left;
+  const savedTop    = o.top;
+  const savedScaleX = o.scaleX;
+  const savedScaleY = o.scaleY;
+  const savedAngle  = o.angle;
+  const savedCrop   = o._crop;
+
+  // Load first — only remove old object if reload succeeds
+  fabric.loadSVGFromString(newSvg, (objs, opts) => {
+    if (!objs || !objs.length) {
+      // Restore style map to previous state and warn
+      o._bonsaiStyleMap = o._prevBonsaiStyleMap || {};
+      alert('Redraw failed — SVG appears empty after applying styles.\nThe drawing has been kept as-is.');
+      return;
+    }
+
+    // Success — now safe to remove old object
+    o._prevBonsaiStyleMap = map;
+    canvas.remove(o);
+
+    const grp = fabric.util.groupSVGElements(objs, opts);
+    grp.set({ left: savedLeft, top: savedTop, scaleX: savedScaleX, scaleY: savedScaleY, angle: savedAngle });
+    grp._annotType      = 'drawing';
+    grp._isBonsaiSvg    = true;
+    grp._rawSvg         = o._rawSvg;
+    grp._bonsaiStyleMap = map;
+    grp._drawingScale   = o._drawingScale;
+    grp._fromBridge     = o._fromBridge;
+    grp._fileName       = o._fileName;
+    grp._crop           = savedCrop;
+    if (savedCrop) _applyCropToObj(grp);
+
+    canvas.add(grp);
+    canvas.setActiveObject(grp);
+    canvas.renderAll();
+    canvas.requestRenderAll();
+    syncProps(grp);
+  });
+
+  closeModal('modal-bonsai-style');
+}
+
+function _applyBonsaiStyleMap(svgStr, map) {
+  // Rather than trying to rewrite existing rules (fragile with regex),
+  // we append override rules at the end of the style block.
+  // Later rules win in CSS — clean and reliable.
+
+  let overrides = '\n/* Dasu style overrides */\n';
+
+  Object.entries(map).forEach(([name, ov]) => {
+    const props = [];
+    if (ov.visible === false) {
+      props.push('display: none !important');
+    } else {
+      if (ov.stroke !== undefined && ov.stroke !== '') {
+        props.push(`stroke: ${ov.stroke} !important`);
+      }
+      if (ov.strokeWidth !== undefined) {
+        props.push(`stroke-width: ${ov.strokeWidth} !important`);
+      }
+    }
+    if (props.length) {
+      overrides += `.${name} { ${props.join('; ')}; }\n`;
+    }
+  });
+
+  // Insert overrides just before the closing </style> tag
+  return svgStr.replace(/<\/style>/i, overrides + '</style>');
+}
+
+// ── DXF Layer Manager ─────────────────────────────────────────────────────────
+
+let _dxfLayerTarget = null;   // the currently selected DXF group
+
+// NZ Drawing Standard lineweights (approx, based on ISO 128)
+const NZ_LINEWEIGHTS = {
+  default: 0.25,
+  '0':     0.18,
+  'DIMS':  0.18, 'DIMENSIONS': 0.18,
+  'TEXT':  0.18,
+  'HATCH': 0.13,
+  'ANNO':  0.18,
+  'WALLS': 0.35,
+  'WALL':  0.35,
+  'SLAB':  0.35,
+  'ROOF':  0.25,
+  'GRID':  0.18,
+  'DEFPOINTS': 0.01,
+};
+
+function openDxfLayerManager() {
+  const o = canvas.getActiveObject();
+  if (!o || !o._fromDxf) return;
+  _dxfLayerTarget = o;
+
+  // Populate layer rows
+  const rows   = document.getElementById('dxf-layer-rows');
+  const layers = o._dxfLayers || [];
+  const map    = o._dxfLayerMap || {};
+  rows.innerHTML = '';
+
+  if (!layers.length) {
+    rows.innerHTML = '<div style="padding:12px;color:var(--txt2);font-size:12px">No layer data available for this DXF.</div>';
+  } else {
+    layers.forEach(layer => {
+      const name    = layer.name;
+      const ov      = map[name] || {};
+      const col     = ov.color      || layer.color     || '#000000';
+      const lw      = ov.lineweight !== undefined ? ov.lineweight : _lwDxfToMm(layer.lineweight || 25);
+      const visible = ov.visible    !== undefined ? ov.visible   : layer.on !== false;
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:auto 1fr 80px 80px 50px;gap:4px 8px;align-items:center;padding:4px 6px;border-radius:4px';
+      row.innerHTML = `
+        <input type="checkbox" data-layer="${name}" class="dxf-vis-chk" ${visible ? 'checked' : ''} style="accent-color:var(--accent)">
+        <span style="font-size:12px;font-family:var(--mono);color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${name}">${name}</span>
+        <div class="colour-well" style="height:22px">
+          <input type="color" data-layer="${name}" class="dxf-col-inp" value="${_ensureHex(col)}" style="width:100%;height:100%">
+        </div>
+        <input type="number" data-layer="${name}" class="dxf-lw-inp p-inp" value="${parseFloat(lw).toFixed(2)}" min="0.01" max="5" step="0.05" style="width:100%">
+        <span style="font-size:10px;color:var(--txt2);text-align:center">${layer.frozen ? '❄' : ''}</span>
+      `;
+      rows.appendChild(row);
+    });
+  }
+
+  // Restore global LW scale
+  document.getElementById('dxf-lw-scale').value = o._dxfLwScale || 1.0;
+
+  openModal('modal-dxf-layers');
+}
+
+function _lwDxfToMm(lw) {
+  // DXF lineweight is stored as 100ths of mm (e.g. 25 = 0.25mm)
+  // -1 = default, -2 = byblock, -3 = bylayer
+  if (!lw || lw < 0) return 0.25;
+  return lw / 100;
+}
+
+function _ensureHex(col) {
+  if (!col) return '#000000';
+  if (col.startsWith('#')) return col;
+  return '#000000';
+}
+
+function applyDxfPreset(preset) {
+  const rows = document.querySelectorAll('#dxf-layer-rows > div');
+  rows.forEach(row => {
+    const nameEl = row.querySelector('[data-layer]');
+    if (!nameEl) return;
+    const name   = nameEl.dataset.layer;
+    const colInp = row.querySelector('.dxf-col-inp');
+    const lwInp  = row.querySelector('.dxf-lw-inp');
+    const visChk = row.querySelector('.dxf-vis-chk');
+    if (!colInp || !lwInp || !visChk) return;
+
+    if (preset === 'nz') {
+      colInp.value = '#000000';
+      const upper = name.toUpperCase();
+      let lw = NZ_LINEWEIGHTS.default;
+      for (const [key, val] of Object.entries(NZ_LINEWEIGHTS)) {
+        if (key !== 'default' && upper.includes(key)) { lw = val; break; }
+      }
+      lwInp.value  = lw.toFixed(2);
+      visChk.checked = true;
+    } else if (preset === 'greyscale') {
+      colInp.value   = '#555555';
+      lwInp.value    = '0.18';
+      visChk.checked = true;
+    } else if (preset === 'reset') {
+      const layer = (_dxfLayerTarget?._dxfLayers || []).find(l => l.name === name);
+      colInp.value   = _ensureHex(layer?.color || '#000000');
+      lwInp.value    = _lwDxfToMm(layer?.lineweight || 25).toFixed(2);
+      visChk.checked = layer?.on !== false;
+    }
+  });
+}
+
+function applyDxfLayerManager() {
+  const o = _dxfLayerTarget;
+  if (!o || !o._rawSvg) {
+    alert('No raw SVG stored — re-import the DXF to use the layer manager.');
+    closeModal('modal-dxf-layers');
+    return;
+  }
+
+  // Collect layer map from UI
+  const map    = {};
+  const lwScale = parseFloat(document.getElementById('dxf-lw-scale').value) || 1;
+
+  document.querySelectorAll('#dxf-layer-rows > div').forEach(row => {
+    const nameEl = row.querySelector('[data-layer]');
+    if (!nameEl) return;
+    const name   = nameEl.dataset.layer;
+    const col    = row.querySelector('.dxf-col-inp')?.value || '#000000';
+    const lw     = parseFloat(row.querySelector('.dxf-lw-inp')?.value) || 0.25;
+    const vis    = row.querySelector('.dxf-vis-chk')?.checked !== false;
+    map[name]    = { color: col, lineweight: Math.round(lw * lwScale * 100), visible: vis };
+  });
+
+  // Store on object
+  o._dxfLayerMap = map;
+  o._dxfLwScale  = lwScale;
+
+  // Modify raw SVG: apply per-layer colour and visibility
+  let svg = o._rawSvg;
+  svg     = _applyLayerMapToSvg(svg, map);
+
+  // Reload into Fabric, preserving position/scale/crop
+  const savedLeft    = o.left;
+  const savedTop     = o.top;
+  const savedScaleX  = o.scaleX;
+  const savedScaleY  = o.scaleY;
+  const savedAngle   = o.angle;
+  const savedCrop    = o._crop;
+  const savedScale   = o._drawingScale;
+
+  canvas.remove(o);
+
+  fabric.loadSVGFromString(svg, (objs, opts) => {
+    if (!objs || !objs.length) {
+      alert('Redraw failed — SVG is empty after applying layer settings.');
+      return;
+    }
+    const grp = fabric.util.groupSVGElements(objs, opts);
+    grp.set({
+      left:   savedLeft,
+      top:    savedTop,
+      scaleX: savedScaleX,
+      scaleY: savedScaleY,
+      angle:  savedAngle,
+    });
+    grp._annotType    = 'drawing';
+    grp._fromDxf      = true;
+    grp._fileName     = o._fileName;
+    grp._dxfLayers    = o._dxfLayers;
+    grp._dxfLayerMap  = map;
+    grp._dxfLwScale   = lwScale;
+    grp._rawSvg       = o._rawSvg;   // keep original unmodified SVG
+    grp._crop         = savedCrop;
+    grp._drawingScale = savedScale;
+    if (savedCrop) _applyCropToObj(grp);
+
+    canvas.add(grp);
+    canvas.setActiveObject(grp);
+    canvas.renderAll();
+    canvas.requestRenderAll();
+    syncProps(grp);
+  });
+
+  closeModal('modal-dxf-layers');
+}
+
+function _applyLayerMapToSvg(svgStr, map) {
+  // Parse SVG, apply colour/visibility per layer group
+  // ezdxf outputs layer groups as <g id="layer-LAYERNAME"> or class-based
+  try {
+    const parser = new DOMParser();
+    const doc    = parser.parseFromString(svgStr, 'image/svg+xml');
+
+    // Find all group elements that represent layers
+    // ezdxf uses id="layer-NAME" convention
+    doc.querySelectorAll('g[id^="layer-"]').forEach(g => {
+      const layerName = g.id.replace(/^layer-/, '');
+      const ov        = map[layerName];
+      if (!ov) return;
+
+      if (ov.visible === false) {
+        g.setAttribute('display', 'none');
+        return;
+      } else {
+        g.removeAttribute('display');
+      }
+
+      // Apply colour to all strokes/fills in this group
+      if (ov.color) {
+        g.querySelectorAll('[stroke]').forEach(el => {
+          if (el.getAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
+            el.setAttribute('stroke', ov.color);
+          }
+        });
+        g.querySelectorAll('[fill]').forEach(el => {
+          const fill = el.getAttribute('fill');
+          if (fill && fill !== 'none' && fill !== 'transparent') {
+            el.setAttribute('fill', ov.color);
+          }
+        });
+        // Also set on the group itself
+        g.setAttribute('stroke', ov.color);
+      }
+
+      // Apply lineweight (DXF lw is 100ths mm, convert to px at 96dpi)
+      if (ov.lineweight != null) {
+        const lwMm = ov.lineweight / 100;
+        const lwPx = (lwMm / 25.4) * 96;
+        g.querySelectorAll('[stroke-width]').forEach(el => {
+          el.setAttribute('stroke-width', lwPx.toFixed(3));
+        });
+        g.setAttribute('stroke-width', lwPx.toFixed(3));
+      }
+    });
+
+    const serialiser = new XMLSerializer();
+    return serialiser.serializeToString(doc.documentElement);
+  } catch(e) {
+    console.warn('SVG layer map apply failed:', e);
+    return svgStr;
+  }
+}
+
 function _placeDxfSvg(svgStr, filename, layers) {
   fabric.loadSVGFromString(svgStr, (objs, opts) => {
     if (!objs || !objs.length) {
@@ -2543,13 +3182,15 @@ function _placeDxfSvg(svgStr, filename, layers) {
     const maxH = hPx * 0.8;
     const scaleW = maxW / grp.width;
     const scaleH = maxH / grp.height;
-    const sc     = Math.min(scaleW, scaleH, 1);   // never upscale
+    const sc     = Math.min(scaleW, scaleH, 1);
     if (sc < 1) grp.scale(sc);
 
     grp._annotType  = 'drawing';
     grp._fromDxf    = true;
     grp._fileName   = filename;
     grp._dxfLayers  = layers;
+    grp._rawSvg     = svgStr;      // store for layer manager re-apply
+    grp._dxfLayerMap = {};         // per-layer overrides: { layerName: { color, lineweight, visible } }
 
     centerObj(grp);
     canvas.add(grp);
@@ -2832,6 +3473,8 @@ function _placeSvgOnSheet(svgStr, name, scaleDenom, targetWpx, targetHpx) {
       _drawingScale:  scaleDenom,
       _fromBridge:    true,
       _fileName:      name,
+      _rawSvg:        svgStr,
+      _isBonsaiSvg:   svgStr.includes('xmlns:ifc=') || svgStr.includes('data-scale='),
     });
 
     // Centre on sheet
@@ -2940,9 +3583,35 @@ function syncProps(obj) {
   document.getElementById('ctx-arrow').classList.toggle('show', isArrow);
   document.getElementById('ctx-dim').classList.toggle('show', isDim);
 
+  // DXF layer manager — show for DXF imports
+  const isDxf = !!obj._fromDxf;
+  document.getElementById('ctx-dxf').classList.toggle('show', isDxf);
+  if (isDxf) {
+    const layers = obj._dxfLayers || [];
+    const info   = document.getElementById('ctx-dxf-info');
+    if (info) info.textContent = layers.length
+      ? `${layers.length} layer${layers.length > 1 ? 's' : ''} · ${obj._fileName || 'DXF'}`
+      : obj._fileName || 'DXF';
+  }
+
+  // Bonsai SVG style manager
+  const isBonsai = !!obj._isBonsaiSvg;
+  document.getElementById('ctx-bonsai').classList.toggle('show', isBonsai);
+  if (isBonsai) {
+    const scaleEl = document.getElementById('ctx-bonsai-scale');
+    if (scaleEl) scaleEl.textContent = obj._drawingScale
+      ? `1:${obj._drawingScale} · ${obj._fileName || 'Bonsai SVG'}`
+      : obj._fileName || 'Bonsai SVG';
+  }
+
   // Populate stroke
   if (hasStroke) {
-    const src = (obj.type === 'group') ? (obj.getObjects()[0] || obj) : obj;
+    // For DXF groups, find first deeply nested path with a stroke
+    let src = obj;
+    if (obj.type === 'group') {
+      const found = _findFirstStrokedObj(obj);
+      if (found) src = found;
+    }
     const sw = (src.strokeWidth || 0) / R;
     document.getElementById('el-stroke-col').value = _hexColour(src.stroke) || '#000000';
     document.getElementById('el-stroke-w').value   = sw.toFixed(2);
@@ -3302,6 +3971,18 @@ function _walkObjects(obj, fn) {
     obj._objects.forEach(child => _walkObjects(child, fn));
   }
   fn(obj);
+}
+
+function _findFirstStrokedObj(obj) {
+  // Returns the first deeply nested object with a visible stroke
+  if (obj._objects) {
+    for (const child of obj._objects) {
+      const found = _findFirstStrokedObj(child);
+      if (found) return found;
+    }
+  }
+  if (obj.stroke && obj.stroke !== 'none' && obj.strokeWidth > 0) return obj;
+  return null;
 }
 
 function _storeOriginalColours(obj) {
@@ -4158,14 +4839,22 @@ function applyStroke() {
   const o = canvas.getActiveObject(); if (!o) return;
   const col = document.getElementById('el-stroke-col').value;
   const w   = parseFloat(document.getElementById('el-stroke-w').value) * R;
-  const targets = (o.type === 'group') ? o.getObjects() : [o];
-  targets.forEach(t => t.set({ stroke: col, strokeWidth: w, strokeUniform: true }));
+  // Recursively apply to all objects in the tree
+  _walkObjects(o, t => {
+    if (t === o && o.type === 'group') return;  // skip the group container itself
+    if (t.stroke !== undefined) t.set({ stroke: col, strokeWidth: w, strokeUniform: true });
+  });
+  canvas.renderAll();
   canvas.requestRenderAll();
 }
+
 function applyNoStroke() {
   const o = canvas.getActiveObject(); if (!o) return;
-  const targets = (o.type === 'group') ? o.getObjects() : [o];
-  targets.forEach(t => t.set({ stroke: null, strokeWidth: 0 }));
+  _walkObjects(o, t => {
+    if (t === o && o.type === 'group') return;
+    if (t.stroke !== undefined) t.set({ stroke: null, strokeWidth: 0 });
+  });
+  canvas.renderAll();
   canvas.requestRenderAll();
 }
 
@@ -5261,7 +5950,7 @@ const CUSTOM_PROPS = [
   '_dimTxtSize','_dimTxtOff','_dimTextOverride','_dimModelMm','_dimColour',
   '_absPts','pathOffset',
   '_colourMode','_singleColour','_origFill','_origStroke',
-  '_fromBridge','_fromDxf','_fileName','_dxfLayers','_pdfPage',
+  '_fromBridge','_fromDxf','_fileName','_dxfLayers','_dxfLayerMap','_rawSvg','_pdfPage','_isBonsaiSvg',
 ];
 
 // ── Session state ─────────────────────────────────────────────────────────────
@@ -5361,7 +6050,7 @@ function _serialise(sheetIndices, mode) {
   const sheetsToSave = sheetIndices.map(i => _sheets[i]).filter(Boolean);
 
   const doc = {
-    version:     '0.3.0',
+    version:     '0.2.0',
     savedAt:     new Date().toISOString(),
     mode:        mode,
     preferences: _capturePrefs(),
@@ -5667,7 +6356,7 @@ async function _renderUserTemplates() {
       <div class="tmpl-sub">${tmpl.note || tmpl.paper}</div>
       <button class="tmpl-del" title="Delete template" onclick="event.stopPropagation();deleteTemplate('${tmpl.id}')">✕</button>`;
     card.onclick = async () => {
-      await _deserialise({ version:'0.3.0', sheets: [tmpl.sheetData] });
+      await _deserialise({ version:'0.2.0', sheets: [tmpl.sheetData] });
       closeModal('modal-start');
     };
     grid.appendChild(card);
