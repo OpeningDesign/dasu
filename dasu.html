@@ -524,7 +524,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="about-logo">
           <div class="name">Dasu<em>.</em>print</div>
           <div><span class="about-badge">ALPHA</span></div>
-          <div class="about-ver">Version 0.1.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
+          <div class="about-ver">Version 0.2.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
         </div>
         <div class="about-body">
           <p>A free, open-source browser-based sheet layout tool — compose drawings from <a href="https://bonsaibim.org" target="_blank">Bonsai BIM</a>, SVG views, and images into print-ready sheets without leaving the browser.</p>
@@ -812,6 +812,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <button class="tb-btn" onclick="addTitleBlock()">+ Title Block</button>
     <button class="tb-btn" onclick="addNorth()">⊕ North</button>
     <button class="tb-btn" onclick="addScaleBar()">┤├ Scale Bar</button>
+    <div class="tsep"></div>
+    <button class="tb-btn" onclick="forceRefresh()" title="Force canvas redraw (R)">↺ Refresh</button>
   </div>
 
   <!-- Body -->
@@ -824,13 +826,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <span>Source</span><span class="chv">▾</span>
         </div>
         <div class="sec-body">
-          <button class="src-btn" onclick="openFile('svg')"><span class="src-icon">⬡</span>IFC / SVG</button>
+          <button class="src-btn" onclick="openFile('svg')"><span class="src-icon">⬡</span>SVG</button>
           <button class="src-btn" onclick="openFile('img')"><span class="src-icon">🖼</span>PNG / JPG</button>
           <button class="src-btn" onclick="openFile('pdf')"><span class="src-icon">📄</span>PDF</button>
-          <button class="src-btn" id="bridge-btn" onclick="showBonsaiBridge()">
-            <span class="src-icon">⬆</span>From Bonsai BIM
-            <span id="bridge-dot" style="width:7px;height:7px;border-radius:50%;background:var(--bdr);display:inline-block;margin-left:auto;flex-shrink:0"></span>
-          </button>
         </div>
       </div>
 
@@ -840,7 +838,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         </div>
         <div class="sec-body">
           <div style="font-size:11px;color:var(--txt2);margin-bottom:8px;line-height:1.5">
-            Converts via bridge server.<br>Requires <code style="color:var(--accent)">pip install ezdxf</code>
+            Converts via bridge server.
           </div>
           <button class="src-btn" onclick="document.getElementById('dxf-file-in').click()">
             <span class="src-icon">⬡</span>Browse DXF…
@@ -854,6 +852,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </button>
           <div id="dxf-sidebar-status" style="font-size:11px;margin-top:5px;padding:0 2px;
             min-height:16px;line-height:1.4"></div>
+          <div style="border-top:1px solid var(--bdr);margin:8px 0 6px"></div>
+          <button class="src-btn" id="dxf-install-btn" onclick="installEzdxf()">
+            <span class="src-icon">⬇</span>Install ezdxf
+          </button>
+          <div id="dxf-install-status" style="font-size:11px;margin-top:4px;padding:0 2px;
+            min-height:14px;line-height:1.4;color:var(--txt2)"></div>
         </div>
       </div>
 
@@ -1386,6 +1390,15 @@ function updateStatus() {
 }
 
 // ── Zoom / Pan ────────────────────────────────────────────────────────────────
+function forceRefresh() {
+  // Force a full synchronous redraw of the entire canvas.
+  // Useful when crop or complex SVG elements don't repaint automatically.
+  canvas.getObjects().forEach(o => o.setCoords());
+  canvas.calcOffset();
+  canvas.renderAll();
+  canvas.requestRenderAll();
+}
+
 function fitZoom() {
   const area = document.getElementById('area');
   const { wPx, hPx } = sheetDim();
@@ -1421,6 +1434,13 @@ function onWheel(opt) {
 // ── Mouse interaction ─────────────────────────────────────────────────────────
 function onDown(opt) {
   const e = opt.e;
+
+  // Never allow sheetRect to be selected
+  if (opt.target && opt.target._isSheetRect) {
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    return;
+  }
 
   // Alt+button1 = pan (but NOT when in line-poly continuation — Alt there means finish)
   if ((e.altKey || e.button === 1) && _linePolyPts.length === 0) {
@@ -2298,6 +2318,43 @@ async function sendDxfToBridge() {
   }
 }
 
+async function installEzdxf() {
+  const port      = (_bonsaiMeta && _bonsaiMeta.bridgePort) ? _bonsaiMeta.bridgePort : 7821;
+  const statusEl  = document.getElementById('dxf-install-status');
+  const btn       = document.getElementById('dxf-install-btn');
+
+  statusEl.textContent = 'Installing ezdxf…';
+  statusEl.style.color = 'var(--txt2)';
+  btn.style.opacity    = '0.4';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    const resp = await fetch(`http://localhost:${port}/install-package`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ package: 'ezdxf' }),
+      signal:  AbortSignal.timeout(130000),
+    });
+
+    const data = await resp.json();
+    if (data.ok) {
+      statusEl.textContent = '✓ ezdxf installed — ready to convert';
+      statusEl.style.color = 'var(--accent)';
+    } else {
+      statusEl.textContent = '✗ Install failed — check bridge terminal';
+      statusEl.style.color = 'var(--danger)';
+    }
+  } catch(e) {
+    statusEl.textContent = e.name === 'TimeoutError'
+      ? 'Timed out — try again'
+      : `Bridge not reachable on port ${port}`;
+    statusEl.style.color = 'var(--danger)';
+  }
+
+  btn.style.opacity       = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
 function _placeDxfSvg(svgStr, filename, layers) {
   fabric.loadSVGFromString(svgStr, (objs, opts) => {
     if (!objs || !objs.length) {
@@ -2639,14 +2696,9 @@ function _showBridgeToast(name, scaleDenom, clickFn) {
 }
 
 function _setBridgeStatus(state) {
-  const btn = document.getElementById('bridge-btn');
-  if (!btn) return;
-  const icons = { off: '⬆', connected: '⬆', disconnected: '⬆' };
-  const cols  = { off: '', connected: 'color:var(--accent)', disconnected: 'color:var(--danger)' };
-  btn.style.cssText = cols[state];
   const dot = document.getElementById('bridge-dot');
   if (dot) {
-    dot.style.background = state === 'connected' ? 'var(--accent)'
+    dot.style.background = state === 'connected'    ? 'var(--accent)'
                          : state === 'disconnected' ? 'var(--danger)' : 'var(--bdr)';
   }
 }
@@ -3000,6 +3052,7 @@ function exitCropMode(o) {
     o.setCoords();
   }
   _savedControls = null;
+  canvas.renderAll();
   canvas.requestRenderAll();
   const btn = document.getElementById('crop-mode-btn');
   if (btn) { btn.textContent = 'Enter Crop Mode'; btn.classList.remove('on'); }
@@ -3024,7 +3077,9 @@ function _applyCropToObj(o) {
       absolutePositioned: false,
     }),
   });
-  canvas.requestRenderAll();
+  o.setCoords();
+  canvas.renderAll();           // synchronous — forces immediate repaint
+  canvas.requestRenderAll();    // async follow-up for any deferred elements
 }
 
 function _syncCropPanel(o) {
@@ -3053,7 +3108,9 @@ function clearCrop() {
   const o = canvas.getActiveObject(); if (!o) return;
   o._crop = { t: 0, r: 0, b: 0, l: 0 };
   o.set({ clipPath: null });
+  o.setCoords();
   _syncCropPanel(o);
+  canvas.renderAll();
   canvas.requestRenderAll();
 }
 
@@ -4056,6 +4113,7 @@ function onKey(e) {
     return;
   }
   if (e.key === 'f' || e.key === 'F') { fitZoom(); return; }
+  if (e.key === 'r' || e.key === 'R') { forceRefresh(); return; }
 
   // ── Arrow key nudge ───────────────────────────────────────────────────────
   const dirs = { ArrowLeft: [-1,0], ArrowRight: [1,0], ArrowUp: [0,-1], ArrowDown: [0,1] };
@@ -4310,9 +4368,12 @@ function _restoreSheet(sheetData) {
   buildSheet();
   if (sheetData.json) {
     canvas.loadFromJSON(sheetData.json, () => {
-      // Re-identify sheetRect after load
       canvas.getObjects().forEach(o => {
-        if (o._isSheetRect) { sheetRect = o; canvas.sendToBack(o); }
+        if (o._isSheetRect) {
+          sheetRect = o;
+          o.set({ selectable: false, evented: false, hoverCursor: 'default' });
+          canvas.sendToBack(o);
+        }
       });
       canvas.requestRenderAll();
     });
@@ -4326,7 +4387,7 @@ function _serialise(sheetIndices, mode) {
   const sheetsToSave = sheetIndices.map(i => _sheets[i]).filter(Boolean);
 
   const doc = {
-    version:     '0.1.0',
+    version:     '0.2.0',
     savedAt:     new Date().toISOString(),
     mode:        mode,
     preferences: _capturePrefs(),
@@ -4632,7 +4693,7 @@ async function _renderUserTemplates() {
       <div class="tmpl-sub">${tmpl.note || tmpl.paper}</div>
       <button class="tmpl-del" title="Delete template" onclick="event.stopPropagation();deleteTemplate('${tmpl.id}')">✕</button>`;
     card.onclick = async () => {
-      await _deserialise({ version:'0.1.0', sheets: [tmpl.sheetData] });
+      await _deserialise({ version:'0.2.0', sheets: [tmpl.sheetData] });
       closeModal('modal-start');
     };
     grid.appendChild(card);
