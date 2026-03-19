@@ -529,7 +529,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="about-logo">
           <div class="name">Dasu<em>.</em>print</div>
           <div><span class="about-badge">ALPHA</span></div>
-          <div class="about-ver">Version 0.4.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
+          <div class="about-ver">Version 0.2.0-alpha &nbsp;·&nbsp; Build 2025 &nbsp;·&nbsp; Dasu (出す)</div>
         </div>
         <div class="about-body">
           <p>A free, open-source browser-based sheet layout tool — compose drawings from <a href="https://bonsaibim.org" target="_blank">Bonsai BIM</a>, SVG views, and images into print-ready sheets without leaving the browser.</p>
@@ -1970,7 +1970,8 @@ function afterRender() {
   const ox   = vpt[4], oy = vpt[5];
   const { wPx, hPx } = sheetDim();
 
-  // ── Grid ──
+  // ── Crop overlay ──
+  _renderCropOverlay(ctx);
   if (gridOn) {
     const gPx = gridMm * R;
     ctx.save();
@@ -4135,6 +4136,7 @@ function _buildCropControls(obj) {
 
       _applyCropToObj(o);
       _syncCropPanel(o);
+      _drawCropOverlay(o);   // refresh overlay position
       return true;
     };
   }
@@ -4175,6 +4177,90 @@ function _buildCropControls(obj) {
   };
 }
 
+// ── Crop overlay — amber dashed rect showing crop boundary ────────────────────
+// Drawn in afterRender so it always appears on top regardless of SVG complexity
+
+let _cropOverlayObj = null;  // the object being cropped
+
+function _drawCropOverlay(o) {
+  _cropOverlayObj = o;
+  canvas.requestRenderAll();
+}
+
+function _clearCropOverlay() {
+  _cropOverlayObj = null;
+  canvas.requestRenderAll();
+}
+
+function _renderCropOverlay(ctx) {
+  const o = _cropOverlayObj;
+  if (!o || !_cropModeActive) return;
+
+  const c    = o._crop || { t: 0, r: 0, b: 0, l: 0 };
+  const vpt  = canvas.viewportTransform;
+  const zoom = vpt[0];
+
+  // Object bounds in canvas px (after viewport transform)
+  const m    = o.calcTransformMatrix();
+  const hw   = o.width  / 2;
+  const hh   = o.height / 2;
+
+  // Four corners of the crop rect in object-local space
+  const lPx = c.l * R, tPx = c.t * R, rPx = c.r * R, bPx = c.b * R;
+  const corners = [
+    { x: -hw + lPx, y: -hh + tPx },
+    { x:  hw - rPx, y: -hh + tPx },
+    { x:  hw - rPx, y:  hh - bPx },
+    { x: -hw + lPx, y:  hh - bPx },
+  ];
+
+  // Transform to canvas screen coords
+  const pts = corners.map(p => {
+    const tp = fabric.util.transformPoint(new fabric.Point(p.x, p.y), m);
+    return {
+      x: vpt[4] + tp.x * zoom,
+      y: vpt[5] + tp.y * zoom,
+    };
+  });
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach((p, i) => { if (i > 0) ctx.lineTo(p.x, p.y); });
+  ctx.closePath();
+
+  // Dashed amber border
+  ctx.strokeStyle = '#EF9F27';
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.stroke();
+
+  // Shaded outside — draw full object rect then subtract crop rect
+  const fullCorners = [
+    { x: -hw, y: -hh }, { x: hw, y: -hh },
+    { x:  hw, y:  hh }, { x: -hw, y:  hh },
+  ].map(p => {
+    const tp = fabric.util.transformPoint(new fabric.Point(p.x, p.y), m);
+    return { x: vpt[4] + tp.x * zoom, y: vpt[5] + tp.y * zoom };
+  });
+
+  ctx.beginPath();
+  // Outer rect (full object)
+  ctx.moveTo(fullCorners[0].x, fullCorners[0].y);
+  fullCorners.forEach((p, i) => { if (i > 0) ctx.lineTo(p.x, p.y); });
+  ctx.closePath();
+  // Inner rect (crop area) — wound opposite direction to create cutout
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = pts.length - 1; i > 0; i--) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+
+  ctx.fillStyle   = 'rgba(0,0,0,0.25)';
+  ctx.setLineDash([]);
+  ctx.fill('evenodd');
+
+  ctx.restore();
+}
+
 function toggleCropMode() {
   const o = canvas.getActiveObject();
   if (!o || o === sheetRect || o._locked) return;
@@ -4185,29 +4271,38 @@ function enterCropMode(o) {
   if (!o) o = canvas.getActiveObject();
   if (!o || o === sheetRect) return;
   _cropModeActive = true;
-  // Save existing controls
   _savedControls = Object.assign({}, o.controls);
-  // Replace with crop handles only
   o.controls = _buildCropControls(o);
   o.setCoords();
   canvas.requestRenderAll();
-  // Update button
   const btn = document.getElementById('crop-mode-btn');
   if (btn) { btn.textContent = 'Exit Crop Mode'; btn.classList.add('on'); }
   const hint = document.getElementById('crop-hint');
   if (hint) { hint.style.color = 'var(--accent)'; hint.textContent = 'Drag amber handles to crop. Click Exit when done.'; }
+  _drawCropOverlay(o);
 }
 
 function exitCropMode(o) {
   if (!o) o = canvas.getActiveObject();
   _cropModeActive = false;
+  _clearCropOverlay();
   if (o && _savedControls) {
     o.controls = _savedControls;
     o.setCoords();
   }
   _savedControls = null;
-  canvas.renderAll();
-  canvas.requestRenderAll();
+  // Keep objectCaching disabled if a clipPath is active —
+  // re-enabling it would cause the cache to render without the clip
+  // It gets restored in clearCrop when clipPath is removed
+  if (o) {
+    o.dirty = true;
+    canvas.renderAll();
+    // Second render after a short delay to catch any deferred redraws
+    setTimeout(() => { canvas.renderAll(); canvas.requestRenderAll(); }, 50);
+  } else {
+    canvas.renderAll();
+    canvas.requestRenderAll();
+  }
   const btn = document.getElementById('crop-mode-btn');
   if (btn) { btn.textContent = 'Enter Crop Mode'; btn.classList.remove('on'); }
   const hint = document.getElementById('crop-hint');
@@ -4222,6 +4317,13 @@ function _applyCropToObj(o) {
   const lPx = l * R, tPx = t * R, rPx = r * R, bPx = b * R;
   const cw  = Math.max(1, w - lPx - rPx);
   const ch  = Math.max(1, h - tPx - bPx);
+
+  // Disable objectCaching on the group only (not children) so clipPath renders
+  if (o.type === 'group' && o.objectCaching) {
+    o.objectCaching = false;
+    o._disabledCaching = true;
+  }
+
   o.set({
     clipPath: new fabric.Rect({
       left:              -w / 2 + lPx,
@@ -4232,8 +4334,8 @@ function _applyCropToObj(o) {
     }),
   });
   o.setCoords();
-  canvas.renderAll();           // synchronous — forces immediate repaint
-  canvas.requestRenderAll();    // async follow-up for any deferred elements
+  canvas.renderAll();
+  canvas.requestRenderAll();
 }
 
 function _syncCropPanel(o) {
@@ -4444,6 +4546,11 @@ function clearCrop() {
   const o = canvas.getActiveObject(); if (!o) return;
   o._crop = { t: 0, r: 0, b: 0, l: 0 };
   o.set({ clipPath: null });
+  // Restore objectCaching if we disabled it
+  if (o._disabledCaching) {
+    o.objectCaching  = true;
+    o._disabledCaching = false;
+  }
   o.setCoords();
   _syncCropPanel(o);
   canvas.renderAll();
@@ -6354,7 +6461,7 @@ function _serialise(sheetIndices, mode) {
   const sheetsToSave = sheetIndices.map(i => _sheets[i]).filter(Boolean);
 
   const doc = {
-    version:     '0.4.0',
+    version:     '0.2.0',
     savedAt:     new Date().toISOString(),
     mode:        mode,
     preferences: _capturePrefs(),
@@ -6770,7 +6877,7 @@ async function _renderUserTemplates() {
       <div class="tmpl-sub">${tmpl.note || tmpl.paper}</div>
       <button class="tmpl-del" title="Delete template" onclick="event.stopPropagation();deleteTemplate('${tmpl.id}')">✕</button>`;
     card.onclick = async () => {
-      await _deserialise({ version:'0.4.0', sheets: [tmpl.sheetData] });
+      await _deserialise({ version:'0.2.0', sheets: [tmpl.sheetData] });
       closeModal('modal-start');
     };
     grid.appendChild(card);
