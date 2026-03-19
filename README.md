@@ -4,8 +4,8 @@
 
 A free, open-source browser-based sheet layout tool built for the [Bonsai BIM](https://bonsaibim.org) / [IfcOpenShell](https://ifcopenshell.org) ecosystem — and anyone else who needs to compose print-ready drawing sheets without proprietary software.
 
-> Developed independently for the benefit of the OSArch and Bonsai communities and anyone else who believes in FOSS.  
-> This is not affiliated with, endorsed by, or a product of either community.
+> Developed independently for the benefit of the OSArch and Bonsai communities.
+> Not affiliated with, endorsed by, or a product of either community.
 
 ---
 
@@ -13,19 +13,16 @@ A free, open-source browser-based sheet layout tool built for the [Bonsai BIM](h
 
 Dasu is a **single HTML file** that runs entirely in your browser. No install. No subscription. No cloud. No vendor lock-in. Open it in Chrome or Edge and it works — on a home PC, a locked-down government machine, a borrowed laptop.
 
-The goal is to bridge the gap between IFC-based BIM authoring in Blender/Bonsai BIM and the production of print-ready drawing sheets. Drawings from Bonsai BIM, DXF files from any source, PDFs from Revit or anywhere else — composed on sheets, annotated, and exported as PDF or SVG, entirely within the browser.
-
 ---
 
 ## Quick Start
 
 1. Download `dasu.html`
-2. Open it in Chrome or Edge — **directly as a local file** (`Ctrl+O`)
+2. Open in Edge or Chrome — **directly as a local file** (`Ctrl+O`)
 3. Choose a template from the Start dialog
 4. Drag SVG, PNG, JPG, or PDF files onto the sheet
 
-Bonsai BIM connection is in progress
-DXF is in progress 
+For DXF import and Bonsai BIM live connection, also run the bridge server:
 ```
 python bridge/dasu_bridge.py
 ```
@@ -37,85 +34,78 @@ python bridge/dasu_bridge.py
 ### Sheet Canvas
 - A4 · A3 · A2 · A1 · Letter, portrait/landscape
 - Configurable grid (1–25 mm), zoom/pan, fit-to-sheet
-- Sheet background locked — cannot be accidentally moved
+- Sheet background permanently locked
+- Elements cannot be placed behind sheet background
 
 ### Import Sources
-- **SVG** — drag-drop or file picker
+- **SVG** — drag-drop or file picker (Inkscape SVGs fully supported)
 - **PNG / JPG** — drag-drop or file picker
-- **PDF** — page picker with 1×–4× render resolution (via PDF.js)
-- **DXF** — converted to SVG via bridge server (ezdxf)
-- **Bonsai BIM** — live push from Blender N-panel via bridge server
+- **PDF** — page picker with 1×–4× render resolution
+- **DXF** — converted via bridge server (ezdxf)
+- **Bonsai BIM** — live push from Blender N-panel via bridge
+
+### Bonsai SVG Intelligence
+- Auto-reads `data-scale` — scale field pre-populated on import
+- Detects `xmlns:ifc=` namespace
+- **Style Manager** — edit CSS classes (IfcWall, PredefinedType-LINEWORK etc.) per drawing. Presets: NZ Drawing Standard, Greyscale Print, Colour by Class. Preserve white fills option keeps text/marker backgrounds intact.
 
 ### Element Panel
-- Position (mm), size (mm), scale label, angle
-- Order (forward/back), align to sheet
-- Mirror X/Y, crop with drag handles, lock
+- Position, size (mm), **scale label drives resize** (centre-anchored, reversible, 10× warning)
+- Order, align, mirror, crop, lock
+- Colour Override — Original / Black / Greyscale / Single colour
+- Bonsai BIM Drawing section with Style Manager access
+- DXF Layers section
 
 ### Snap Engine
 - Grid snap, sheet edges/centres, element edges/centres, equal spacing
-- Smart guide lines, ortho lock (Ctrl), angle snap (Shift)
-- Arrow key nudge, large nudge with Shift/Ctrl
+- Smart guides, ortho lock (Ctrl), angle snap (Shift)
+- Arrow key nudge
 
 ### Annotation Tools
-- Line (with Alt→polyline continuation)
-- Polyline / Polygon
-- Rectangle, Circle / Ellipse
-- Arrow / Leader
-- Dimension (basic)
-- Text — full formatting, background box, revision cloud border
+- Line, Polyline/Polygon, Rectangle, Circle/Ellipse, Arrow/Leader
+- **Dimension** — three-click workflow, H/V/A modes, live rubber-band, scale-aware
+- Text — formatting, background box, revision cloud border
+- All annotate tools suspend element selection
 
-### Fill & Stroke
-- Solid colour, hatch patterns (5 styles), linear gradient
-- Stroke width uniform across scale
+### Canvas UX
+- **☰ Elements panel** — list all elements, toggle hide/show and lock per element
+- **Lock icon on hover only** — clean canvas, icon appears only on mouse-over
+- **Shift+rotate** — snaps to lineAngleSnap increment
+- Copy (Ctrl+C) / Paste internal (Ctrl+Shift+V) / Paste OS (Ctrl+V)
+- Duplicate (Ctrl+D), Select all (Ctrl+A), Order (Ctrl+[/])
+- Space to pan, G to toggle grid, S to toggle snap
+
+### Sheets
+- **Duplicate sheet** — Shift+click `+` or right-click tab
+- **Delete sheet** — right-click tab
+- **Rename sheet** — double-click tab or right-click tab
 
 ### File System
-- `.bprint` format — Portable (embedded) or Referenced mode
+- `.bprint` format — Portable or Referenced
 - Save As with OS native folder picker
-- Auto-save to IndexedDB (3s debounce)
-- Recent files, built-in and user templates
-- Start dialog — New / Templates / Recent
+- Auto-save to IndexedDB, recent files, templates, start dialog
 
 ### Export
 - PDF (jsPDF), SVG, browser Print
-
-### Multi-page
-- Tab-based sheets, per-sheet paper settings
-- Add sheets, switch preserves state
+- Outputs panel pinned to left sidebar bottom
 
 ---
 
 ## Bonsai BIM Bridge
 
-The bridge connects Dasu to Blender/Bonsai BIM for live drawing push, and handles DXF→SVG conversion for any DXF file.
-
-### Requirements
-- Python 3.6+ (bridge server — stdlib only, no pip needed for basic operation)
-- `pip install ezdxf Pillow` for DXF conversion
-- Blender 4.x / 5.x with Bonsai BIM for live drawing push
-
-### Setup
-
 ```bash
-# Terminal 1 — start the bridge
 python bridge/dasu_bridge.py
-
-# Blender Text Editor — open and run:
-blender/dasu_panel.py
-# Then: N-panel → Dasu tab → set drawings folder → Send to Dasu ↗
 ```
 
-The bridge listens on `localhost:7821`. Open `http://localhost:7821` for a status page.
-
-### DXF Import (no Bonsai needed)
-1. Run `dasu_bridge.py`
-2. In Dasu sidebar: DXF Import → Browse DXF → Convert & Import
-3. Works with any DXF from any source
+Listens on `localhost:7821`. Handles:
+- Live drawing push from Blender N-panel
+- DXF→SVG conversion via ezdxf (`pip install ezdxf Pillow`)
+- In-app ezdxf install button (no terminal needed)
 
 ### One-click startup (Windows)
-Create `start-dasu.bat`:
 ```batch
 @echo off
-start "" C:\Users\nigel\AppData\Local\Programs\Python\Python311\python.exe C:\dasu\bridge\dasu_bridge.py
+start "" python C:\dasu\bridge\dasu_bridge.py
 timeout /t 2
 start msedge "file:///C:/dasu/dasu.html"
 ```
@@ -126,59 +116,10 @@ start msedge "file:///C:/dasu/dasu.html"
 
 | Library | Licence | Purpose |
 |---------|---------|---------|
-| [Fabric.js 5.3.1](https://fabricjs.com) | MIT | Canvas manipulation |
-| [jsPDF 2.5.1](https://parall.ax/products/jspdf) | MIT | PDF generation |
-| [PDF.js 3.11](https://mozilla.github.io/pdf.js/) | Apache 2.0 | PDF import |
-| [ezdxf](https://ezdxf.readthedocs.io) *(bridge)* | MIT | DXF→SVG conversion |
-
-Zero proprietary dependencies. Runs fully local. No cloud. No licence fees.
-
----
-
-## File Format — `.bprint`
-
-Plain JSON. Two save modes:
-- **Portable** — all assets embedded as base64 (self-contained)
-- **Referenced** — asset paths only (smaller, assets must stay in place)
-
-Auto-save runs every 3 seconds to browser IndexedDB in referenced mode.
-
----
-
-## Keyboard Shortcuts
-
-See `docs/dasu-kb-shortcuts.xlsx` for the full reference matrix.
-
-**Key shortcuts:**
-
-| Key | Action |
-|-----|--------|
-| `F` | Fit sheet |
-| `R` | Force refresh |
-| `Del` | Delete selected |
-| `Esc` | Cancel / deselect |
-| `Ctrl+S` | Save |
-| `Ctrl+Shift+S` | Save As |
-| `Ctrl+N` | New |
-| `Ctrl+O` | Open |
-| `Ctrl+P` | Print |
-| `Ctrl+Shift+E` | Export PDF |
-| `Alt+drag` | Pan canvas |
-| `Ctrl+drag` | Ortho lock |
-| `Shift+drag` | Snaps active |
-| Arrow keys | Nudge element |
-
----
-
-## Roadmap
-
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 1 | ✅ Done | Canvas, snap, element panel, text, file system, templates, multi-page |
-| 2 | ✅ Done | PDF import, DXF import via bridge, Bonsai BIM bridge, sheets fix |
-| 3 | 🔵 Active | Clipboard paste, copy/paste across sheets, DXF layer manager, dimension tool, keyboard shortcuts |
-| 4 | 🟡 Planned | Editable title block fields, rulers, undo/redo |
-| 5 | ⚪ Future | Associated dimensions, TAKT planning integration |
+| Fabric.js 5.3.1 | MIT | Canvas |
+| jsPDF 2.5.1 | MIT | PDF export |
+| PDF.js 3.11 | Apache 2.0 | PDF import |
+| ezdxf *(bridge)* | MIT | DXF→SVG |
 
 ---
 
@@ -186,11 +127,9 @@ See `docs/dasu-kb-shortcuts.xlsx` for the full reference matrix.
 
 ```
 dasu/
-├── dasu.html              ← the complete app (single file)
-├── bridge/
-│   └── dasu_bridge.py     ← local HTTP bridge server (Python stdlib)
-├── blender/
-│   └── dasu_panel.py      ← Blender N-panel script
+├── dasu.html
+├── bridge/dasu_bridge.py
+├── blender/dasu_panel.py
 ├── docs/
 │   ├── dasu-onepager.docx
 │   └── dasu-kb-shortcuts.xlsx
@@ -201,20 +140,10 @@ dasu/
 
 ---
 
-## Contributing
-
-Issues, pull requests, and feedback welcome. Built for the OSArch and Bonsai communities — independently developed.
-
-- [OSArch Community](https://community.osarch.org)
-- [Bonsai BIM](https://bonsaibim.org)
-- [IfcOpenShell](https://github.com/IfcOpenShell/IfcOpenShell)
-
----
-
 ## Licence
 
-MIT — see [LICENSE](LICENSE)
+MIT
 
 ---
 
-*Dasu.print v0.2.0-alpha · 出す · Built for the OSArch / Bonsai BIM community · github.com/4nigel/dasu*
+*Dasu.print v0.4.0-alpha · 出す · github.com/4nigel/dasu*
