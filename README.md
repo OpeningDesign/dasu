@@ -1,4 +1,5 @@
-# Dasu.print — Sheet Layout Tool
+# Dasu.print — Sheet Layout Tool Project
+# a work in progress :)
 
 **出す** *(dasu)* — Japanese: *to output / to print*
 
