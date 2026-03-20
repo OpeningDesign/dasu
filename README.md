@@ -6,7 +6,6 @@ a work in progress :)
 A free, open-source browser-based sheet layout tool built for the [Bonsai BIM](https://bonsaibim.org) / [IfcOpenShell](https://ifcopenshell.org) ecosystem — and anyone else who needs to compose print-ready drawing sheets without proprietary software.
 
 > Developed independently for the benefit of the OSArch and Bonsai communities and everyone else.
-> Not affiliated with, endorsed by, or a product of either community but would like to be that cool.
 
 ---
 
