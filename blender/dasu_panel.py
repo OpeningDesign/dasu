@@ -15,6 +15,16 @@ Workflow:
   6. Dasu picks it up automatically and places it on the active sheet
 """
 
+bl_info = {
+    "name": "Dasu Bridge",
+    "author": "4nigel",
+    "version": (0, 1, 0),
+    "blender": (4, 0, 0),
+    "location": "View3D > N-Panel > Dasu",
+    "description": "Send Bonsai BIM drawings to the Dasu sheet layout tool",
+    "category": "Import-Export",
+}
+
 import bpy
 import json
 import os
@@ -776,14 +786,18 @@ CLASSES = [
     DASU_PT_panel,
 ]
 
-# Self-unregister (safe to re-run in Text Editor)
-for cls in CLASSES:
-    try: bpy.utils.unregister_class(cls)
-    except Exception: pass
-_unregister_props()
+def register():
+    for cls in CLASSES:
+        bpy.utils.register_class(cls)
+    _register_props()
+    print('\n  Dasu panel registered.  Press N in the 3D viewport → Dasu tab.\n')
 
-for cls in CLASSES:
-    bpy.utils.register_class(cls)
-_register_props()
 
-print('\n  Dasu panel registered.  Press N in the 3D viewport → Dasu tab.\n')
+def unregister():
+    for cls in reversed(CLASSES):
+        bpy.utils.unregister_class(cls)
+    _unregister_props()
+
+
+if __name__ == '__main__':
+    register()
