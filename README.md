@@ -14,6 +14,9 @@ A free, open-source browser-based sheet layout tool built for the [Bonsai BIM](h
 
 Dasu is a **single HTML file** that runs entirely in your browser. No install. No subscription. No cloud. No vendor lock-in. Open it in Chrome or Edge (other browsers have not been tested) and it works — on a home PC, a locked-down government machine, a borrowed laptop or your phone.
 
+## Confession
+
+I am using Claude AI to do this project, I had an idea of what I wanted the app to look like and how it should work but no idea how to write the HTML. 
 ---
 
 ## Quick Start
