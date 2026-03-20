@@ -40,7 +40,7 @@ python bridge/dasu_bridge.py
 - Sheet background permanently locked
 - Elements cannot be placed behind sheet background
 
-### Import Sources
+### Import Sources - Elements 
 - **SVG** — drag-drop or file picker (Inkscape SVGs fully supported)
 - **PNG / JPG** — drag-drop or file picker
 - **PDF** — page picker with 1×–4× render resolution
@@ -64,7 +64,7 @@ python bridge/dasu_bridge.py
 - Smart guides, ortho lock (Ctrl), angle snap (Shift)
 - Arrow key nudge
 
-### Annotation Tools (not trying to be a CAD app)
+### Annotation Tools - Objects (not trying to be a CAD app)
 - Line, Polyline/Polygon, Rectangle, Circle/Ellipse, Arrow/Leader
 - **Dimension** — three-click workflow, H/V/A modes, live rubber-band, scale-aware
 - Text — formatting, background box, revision cloud border
