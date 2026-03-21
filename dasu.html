@@ -2793,17 +2793,29 @@ function loadFile(file, pos) {
         grp._rawSvg    = svgStr;
         grp._annotType = 'drawing';
 
-        // ── Auto-read data-scale from Bonsai SVG ─────────────────────────
-        const scaleMatch = svgStr.match(/data-scale=["'](\d+):(\d+)["']/);
-        if (scaleMatch) {
-          const scaleDenom = parseInt(scaleMatch[2]);
-          grp._drawingScale  = scaleDenom;
-          grp._isBonsaiSvg   = true;
+        // ── Read authoritative values from SVG line 1 ─────────────────────
+        const _el       = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
+        const declWmm   = _parseSvgDimMm(_el.getAttribute('width'));
+        const dataScale = _el.getAttribute('data-scale');
+
+        // Scale label from data-scale
+        if (dataScale && dataScale.includes(':')) {
+          const denom = parseInt(dataScale.split(':')[1]);
+          if (!isNaN(denom)) {
+            grp._drawingScale = denom;
+            grp._isBonsaiSvg  = true;
+          }
         }
 
-        // ── Detect ifc: namespace ─────────────────────────────────────────
+        // ifc: namespace detection
         if (svgStr.includes('xmlns:ifc=') || svgStr.includes('ifc:')) {
           grp._isBonsaiSvg = true;
+        }
+
+        // Force to declared mm size
+        if (declWmm > 0 && grp.width > 0) {
+          const sc = (declWmm * R) / grp.width;
+          grp.set({ scaleX: sc, scaleY: sc });
         }
 
         pos ? grp.set({ left: pos.x, top: pos.y }) : centerObj(grp);
@@ -4345,42 +4357,34 @@ async function _bridgePoll(port) {
 }
 
 function _placeBridgeDrawing(drawing) {
-  // Parse the SVG to get its intrinsic viewBox
-  const parser   = new DOMParser();
-  const svgDoc   = parser.parseFromString(drawing.svg, 'image/svg+xml');
-  const svgEl    = svgDoc.documentElement;
-  const vb       = svgEl.getAttribute('viewBox');
+  // Parse the SVG to get declared paper dimensions
+  const parser  = new DOMParser();
+  const svgDoc  = parser.parseFromString(drawing.svg, 'image/svg+xml');
+  const svgEl   = svgDoc.documentElement;
 
-  let svgWpx = parseFloat(svgEl.getAttribute('width')  || '0');
-  let svgHpx = parseFloat(svgEl.getAttribute('height') || '0');
+  // Declared dimensions — Bonsai writes these in mm (e.g. width="100.0mm")
+  const declWmm = _parseSvgDimMm(svgEl.getAttribute('width'));
+  const declHmm = _parseSvgDimMm(svgEl.getAttribute('height'));
 
-  if (vb) {
-    const parts = vb.trim().split(/[\s,]+/).map(Number);
-    if (parts.length === 4) { svgWpx = parts[2]; svgHpx = parts[3]; }
-  }
-
-  // Calculate target size on the sheet in canvas px
-  // Bonsai SVG viewBox is in IFC units (usually mm).
-  // scaleDenom: e.g. 50 for 1:50 — so 1mm on sheet = scaleDenom mm in model.
-  // Sheet px per model-mm = R / scaleDenom
   const scaleDenom = drawing.scaleDenom || 100;
   const { wPx: sheetW, hPx: sheetH } = sheetDim();
 
-  // If paper info came from Blender, use it; otherwise fit 60% of sheet width
+  // Target size on the sheet in canvas px.
+  // If Bonsai sent paper extents (camera width/height at model scale), use those.
+  // Otherwise fall back to the declared SVG dimensions directly.
   let targetWpx, targetHpx;
-  if (drawing.paperMm && drawing.paperMm.w && svgWpx > 0 && svgHpx > 0) {
-    // paperMm is the camera's capture extent in mm at model scale
-    // on sheet: capture_mm / scaleDenom = sheet_mm; sheet_mm * R = canvas px
+  if (drawing.paperMm && drawing.paperMm.w) {
+    // paperMm = camera capture extent in model mm → divide by scale → paper mm
     const sheetMmW = drawing.paperMm.w / scaleDenom;
     const sheetMmH = drawing.paperMm.h / scaleDenom;
     targetWpx = sheetMmW * R;
     targetHpx = sheetMmH * R;
-  } else if (svgWpx > 0 && svgHpx > 0) {
-    // Fallback: treat SVG px as mm-at-scale, map to canvas px
-    targetWpx = (svgWpx / scaleDenom) * R;
-    targetHpx = (svgHpx / scaleDenom) * R;
+  } else if (declWmm > 0) {
+    // Declared SVG dimensions are already in paper mm
+    targetWpx = declWmm * R;
+    targetHpx = declHmm * R;
   } else {
-    // Last resort: 60% sheet width
+    // Last resort: 60% of sheet
     targetWpx = sheetW * 0.6;
     targetHpx = sheetH * 0.6;
   }
@@ -4396,28 +4400,57 @@ function _placeBridgeDrawing(drawing) {
   _placeSvgOnSheet(drawing.svg, drawing.name, scaleDenom, targetWpx, targetHpx);
 }
 
+// Parse an SVG dimension attribute like "100mm", "297mm", "100px", "100" to mm
+function _parseSvgDimMm(attr) {
+  if (!attr) return 0;
+  const s = attr.trim();
+  const val = parseFloat(s);
+  if (isNaN(val)) return 0;
+  if (s.endsWith('mm'))   return val;
+  if (s.endsWith('cm'))   return val * 10;
+  if (s.endsWith('in'))   return val * 25.4;
+  if (s.endsWith('pt'))   return val * (25.4 / 72);
+  if (s.endsWith('pc'))   return val * (25.4 / 6);
+  if (s.endsWith('px'))   return val / R;
+  return val / R;  // bare number — assume px
+}
+
 function _placeSvgOnSheet(svgStr, name, scaleDenom, targetWpx, targetHpx) {
+  const _el = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
+
+  // ── Read authoritative values from SVG line 1 ─────────────────────────────
+  // Bonsai writes width and height in mm and data-scale as "1:NNN".
+  // These override everything — Fabric's computed size, anything sent by Blender.
+  const declWmm   = _parseSvgDimMm(_el.getAttribute('width'));   // e.g. 150mm
+  const declHmm   = _parseSvgDimMm(_el.getAttribute('height'));  // e.g. 100mm
+  const dataScale = _el.getAttribute('data-scale');               // e.g. "1:100"
+
+  if (dataScale && dataScale.includes(':')) {
+    const parsed = parseInt(dataScale.split(':')[1]);
+    if (!isNaN(parsed)) scaleDenom = parsed;
+  }
+
   fabric.loadSVGFromString(svgStr, (objs, opts) => {
     if (!objs || objs.length === 0) return;
     const grp = fabric.util.groupSVGElements(objs, opts);
 
-    // Scale to target size
-    const sx = targetWpx / grp.width;
-    const sy = targetHpx / grp.height;
-    const sc = Math.min(sx, sy);   // uniform scale
+    // Force element to exactly the declared mm size.
+    // sc corrects whatever internal scale Fabric applied when loading the SVG.
+    // After this: grp.getScaledWidth() = declWmm × R canvas px = declWmm mm on sheet.
+    if (declWmm > 0 && grp.width > 0) {
+      const sc = (declWmm * R) / grp.width;
+      grp.set({ scaleX: sc, scaleY: sc });
+    }
 
     grp.set({
-      scaleX:         sc,
-      scaleY:         sc,
-      _annotType:     'drawing',
-      _drawingScale:  scaleDenom,
-      _fromBridge:    true,
-      _fileName:      name,
-      _rawSvg:        svgStr,
-      _isBonsaiSvg:   svgStr.includes('xmlns:ifc=') || svgStr.includes('data-scale='),
+      _annotType:    'drawing',
+      _drawingScale: scaleDenom,
+      _fromBridge:   true,
+      _fileName:     name,
+      _rawSvg:       svgStr,
+      _isBonsaiSvg:  true,
     });
 
-    // Centre on sheet
     const { wPx, hPx } = sheetDim();
     grp.set({
       left: (wPx - grp.getScaledWidth())  / 2,
@@ -4428,7 +4461,6 @@ function _placeSvgOnSheet(svgStr, name, scaleDenom, targetWpx, targetHpx) {
     canvas.setActiveObject(grp);
     canvas.requestRenderAll();
     syncProps(grp);
-
     _showBridgeToast(name, scaleDenom, null);
   });
 }
