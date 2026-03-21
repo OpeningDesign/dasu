@@ -21,7 +21,7 @@ Dasu is a **single HTML file** that runs entirely in your browser. No install. N
 ## Quick Start
 
 1. Download `dasu.html`
-2. Open in Edge or Chrome (I don't know if it works in other browser) — **directly as a local file** (`Ctrl+O`)
+2. Open in Edge or Chrome (I don't know if it works in other browsers) — **directly as a local file** (`Ctrl+O`)
 3. Choose a template from the Start dialog
 4. Drag SVG, PNG, JPG, or PDF files onto the sheet
 
