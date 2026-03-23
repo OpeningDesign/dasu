@@ -851,10 +851,55 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
         <!-- Sheet identity -->
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;
-          letter-spacing:0.08em;color:var(--txt2);margin-bottom:8px">Sheet Identity</div>
+          letter-spacing:0.08em;color:var(--txt2);margin:16px 0 8px">Project Info</div>
+        <div style="font-size:11px;color:var(--txt2);margin-bottom:10px;font-style:italic">
+          Shared across all sheets — auto-populated by bridge when IFC is loaded.
+        </div>
 
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Sheet name</div>
+          <div><div class="pref-row-lbl">Project name</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-project-name" type="text" style="width:200px"
+              placeholder="e.g. Smith Residence">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Project number</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-project-number" type="text" style="width:120px"
+              placeholder="e.g. 2024-042">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Site name</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-site-name" type="text" style="width:200px"
+              placeholder="e.g. 12 Example Street">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Client name</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-client-name" type="text" style="width:200px"
+              placeholder="e.g. J Smith">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Architect / Designer</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-architect-name" type="text" style="width:200px"
+              placeholder="e.g. Empiricus Design">
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;
+          letter-spacing:0.08em;color:var(--txt2);margin:16px 0 8px">Sheet Identity</div>
+        <div style="font-size:11px;color:var(--txt2);margin-bottom:10px;font-style:italic">
+          Token names shown in <span style="color:var(--accent);font-family:monospace">{{PascalCase}}</span>
+        </div>
+
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Sheet name <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Name}}</span></div>
           <div class="pref-row-sub">Shown on title block and tab</div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-name" type="text" style="width:200px"
@@ -862,7 +907,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Sheet number / ID</div>
+          <div><div class="pref-row-lbl">Sheet number <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Identification}}</span></div>
           <div class="pref-row-sub">e.g. A-001</div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-id" type="text" style="width:120px"
@@ -870,19 +915,26 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Description</div>
-          <div class="pref-row-sub">Brief content description</div></div>
+          <div><div class="pref-row-lbl">Description <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Description}}</span></div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-description" type="text" style="width:200px"
               placeholder="e.g. Floor plan showing...">
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Scale</div>
+          <div><div class="pref-row-lbl">Scale <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Scale}}</span></div>
           <div class="pref-row-sub">Override auto-detected scale</div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-scale" type="text" style="width:100px"
               placeholder="e.g. 1:100">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Scope <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Scope}}</span></div>
+          <div class="pref-row-sub">e.g. project scope or discipline group</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-scope" type="text" style="width:160px"
+              placeholder="e.g. Architecture">
           </div>
         </div>
 
@@ -890,9 +942,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           letter-spacing:0.08em;color:var(--txt2);margin:16px 0 8px">Issue Status</div>
 
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Status</div></div>
+          <div><div class="pref-row-lbl">Status <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Status}}</span></div></div>
           <div class="pref-ctrl">
-            <select class="pref-inp" id="sp-status" style="width:180px">
+            <select class="pref-inp" id="sp-status" style="width:200px">
               <option value="DRAFT">DRAFT</option>
               <option value="FOR REVIEW">FOR REVIEW</option>
               <option value="FOR CONSENT">FOR CONSENT</option>
@@ -903,7 +955,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Revision</div>
+          <div><div class="pref-row-lbl">Revision <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Revision}}</span></div>
           <div class="pref-row-sub">e.g. A, B, C or 01, 02</div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-revision" type="text" style="width:80px"
@@ -911,17 +963,37 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Issue date</div></div>
+          <div><div class="pref-row-lbl">Issue date <span style="color:var(--accent);font-family:monospace;font-size:10px">{{LastRevisionTime}}</span></div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-issuedate" type="date" style="width:150px">
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Purpose</div>
+          <div><div class="pref-row-lbl">Purpose <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Purpose}}</span></div>
           <div class="pref-row-sub">e.g. Consent, Construction, As-built</div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-purpose" type="text" style="width:160px"
               placeholder="e.g. Construction">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Intended use <span style="color:var(--accent);font-family:monospace;font-size:10px">{{IntendedUse}}</span></div>
+          <div class="pref-row-sub">e.g. Building Consent, Construction Issue</div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-intendeduse" type="text" style="width:180px"
+              placeholder="e.g. Building Consent">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Valid from <span style="color:var(--accent);font-family:monospace;font-size:10px">{{ValidFrom}}</span></div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-validfrom" type="date" style="width:150px">
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><div class="pref-row-lbl">Valid until <span style="color:var(--accent);font-family:monospace;font-size:10px">{{ValidUntil}}</span></div></div>
+          <div class="pref-ctrl">
+            <input class="pref-inp" id="sp-validuntil" type="date" style="width:150px">
           </div>
         </div>
 
@@ -929,14 +1001,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           letter-spacing:0.08em;color:var(--txt2);margin:16px 0 8px">People</div>
 
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Drawn by</div></div>
+          <div><div class="pref-row-lbl">Drawn by <span style="color:var(--accent);font-family:monospace;font-size:10px">{{DrawnBy}}</span></div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-drawnby" type="text" style="width:160px"
               placeholder="Name or initials">
           </div>
         </div>
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Checked by</div></div>
+          <div><div class="pref-row-lbl">Checked by <span style="color:var(--accent);font-family:monospace;font-size:10px">{{CheckedBy}}</span></div></div>
           <div class="pref-ctrl">
             <input class="pref-inp" id="sp-checkedby" type="text" style="width:160px"
               placeholder="Name or initials">
@@ -947,7 +1019,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           letter-spacing:0.08em;color:var(--txt2);margin:16px 0 8px">Classification</div>
 
         <div class="pref-row">
-          <div><div class="pref-row-lbl">Discipline</div></div>
+          <div><div class="pref-row-lbl">Discipline <span style="color:var(--accent);font-family:monospace;font-size:10px">{{Discipline}}</span></div></div>
           <div class="pref-ctrl">
             <select class="pref-inp" id="sp-discipline" style="width:180px">
               <option value="">— not set —</option>
@@ -1793,7 +1865,17 @@ const DASU_BUILD   = '260320-1332';   // YYMMDD-HHMM 24hr
 
 let tool        = 'select';
 let _guides     = [];   // smart guide lines
-let _bonsaiMeta = { projectName: '', ifcPath: '', bridgePort: 7821, linkedDrawings: [] };
+let _bonsaiMeta = {
+  projectName:    '',
+  projectNumber:  '',
+  siteName:       '',
+  clientName:     '',
+  architectName:  '',
+  projectAddress: '',
+  ifcPath:        '',
+  bridgePort:     7821,
+  linkedDrawings: [],
+};
 let canvas;
 let sheetRect;
 
@@ -3238,22 +3320,48 @@ async function deleteAsset(id) {
   await _refreshAssetDropdown();
 }
 
+// Resolve {{tokens}} in SVG text content before Fabric loads it.
+// Replaces token text in <tspan> and <text> element content.
+function _resolveTokensInSvg(svgStr) {
+  return svgStr.replace(/>(\s*\{\{[^}]+\}\}\s*)</g, (match, inner) => {
+    const resolved = _resolveTokens(inner.trim());
+    return '>' + resolved + '<';
+  });
+}
+
 async function insertAssetFromLibrary(id) {
   const asset = await _dbGet('assets', id);
   if (!asset || !asset.svg) return;
   closeModal('modal-assets');
   _closeAssetsPanel();
 
-  fabric.loadSVGFromString(asset.svg, (objs, opts) => {
+  // Resolve tokens before loading — _rawSvg keeps the unresolved original
+  // so it can be re-resolved on sheet switch or rename
+  const resolvedSvg = _resolveTokensInSvg(asset.svg);
+
+  fabric.loadSVGFromString(resolvedSvg, (objs, opts) => {
     if (!objs || !objs.length) return;
     const grp = fabric.util.groupSVGElements(objs, opts);
     const { wPx, hPx } = sheetDim();
-    const maxW = wPx * 0.6, maxH = hPx * 0.6;
-    const sc   = Math.min(maxW / grp.width, maxH / grp.height, 1);
-    if (sc < 1) grp.scale(sc);
-    grp._annotType = 'drawing';
-    grp._fileName  = asset.name;
-    grp._rawSvg    = asset.svg;
+
+    // Apply declared mm size if available
+    const _el    = new DOMParser().parseFromString(asset.svg, 'image/svg+xml').documentElement;
+    const declWmm = _parseSvgDimMm(_el.getAttribute('width'));
+    if (declWmm > 0 && grp.width > 0) {
+      const sc = (declWmm * R) / grp.width;
+      grp.set({ scaleX: sc, scaleY: sc });
+    } else {
+      const maxW = wPx * 0.6, maxH = hPx * 0.6;
+      const sc   = Math.min(maxW / grp.width, maxH / grp.height, 1);
+      if (sc < 1) grp.scale(sc);
+    }
+
+    grp._annotType    = 'drawing';
+    grp._fileName     = asset.name;
+    grp._rawSvg       = asset.svg;   // unresolved — used for re-render on refresh
+    grp._assetId      = asset.id;    // so _refreshTitleBlocks can re-resolve
+    grp._isTitleBlock = true;        // participates in title block refresh
+
     centerObj(grp);
     canvas.add(grp);
     canvas.setActiveObject(grp);
@@ -4111,36 +4219,57 @@ function _resolveTokens(text) {
 
   const pad  = n => String(n).padStart(2, '0');
   const date = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
-  const yr   = now.getFullYear();
+  const yr   = String(now.getFullYear());
 
-  // Find active drawing scale from canvas if not in meta
+  // Scale: manual meta override, else auto-detect from first drawing on canvas
   const activeScale = (() => {
     if (meta.scale) return meta.scale;
     const drw = canvas.getObjects().find(o => o._drawingScale);
-    return drw ? drw._drawingScale : '';
+    if (!drw) return '';
+    const d = drw._drawingScale;
+    return (typeof d === 'string' && d.includes(':')) ? d : '1:' + d;
   })();
 
+  // Empty value placeholder — shows TBC for missing sheet data
+  const tbc = '';
+
   const tokens = {
-    'sheet.name':    s.name          || '',
-    'sheet.id':      meta.id         || '',
-    'sheet.scale':   activeScale     || '',
-    'sheet.status':  meta.status     || 'DRAFT',
-    'revision':      meta.revision   || '—',
-    'drawn.by':      meta.drawnBy    || '',
-    'checked.by':    meta.checkedBy  || '',
-    'issue.date':    meta.issueDate  || '',
-    'purpose':       meta.purpose    || '',
-    'discipline':    meta.discipline || '',
-    'description':   meta.description|| '',
-    'project.name':  bm.projectName  || '',
-    'project.address': bm.projectAddress || '',
-    'date':          date,
-    'year':          yr,
+    // ── Bonsai IfcDocumentInformation ─────────────────────────────────────
+    'Identification':     meta.id          || tbc,
+    'Name':               s.name           || tbc,
+    'Description':        meta.description || tbc,
+    'Revision':           meta.revision    || tbc,
+    'Status':             meta.status      || 'DRAFT',
+    'Purpose':            meta.purpose     || tbc,
+    'IntendedUse':        meta.intendedUse || tbc,
+    'Scope':              meta.scope       || tbc,
+    'LastRevisionTime':   meta.issueDate   || tbc,
+    'ValidFrom':          meta.validFrom   || tbc,
+    'ValidUntil':         meta.validUntil  || tbc,
+    // ── Bonsai view-title (drawing reference + sheet) ─────────────────────
+    'Scale':              activeScale      || tbc,
+    'SheetName':          s.name           || tbc,
+    'SheetIdentification':meta.id          || tbc,
+    'SheetRevision':      meta.revision    || tbc,
+    // ── Dasu additional ───────────────────────────────────────────────────
+    'ProjectName':        bm.projectName    || tbc,
+    'ProjectNumber':      bm.projectNumber  || tbc,
+    'ProjectAddress':     bm.projectAddress || tbc,
+    'SiteName':           bm.siteName       || tbc,
+    'ClientName':         bm.clientName     || tbc,
+    'ArchitectName':      bm.architectName  || tbc,
+    'DrawnBy':            meta.drawnBy      || tbc,
+    'CheckedBy':          meta.checkedBy    || tbc,
+    'IssueDate':          meta.issueDate    || tbc,  // friendly alias of LastRevisionTime
+    'Discipline':         meta.discipline   || tbc,
+    'Date':               date,
+    'Year':               yr,
   };
 
-  return text.replace(/\{\{([^}]+)\}\}/g, (_, key) =>
-    tokens[key.trim()] !== undefined ? tokens[key.trim()] : `{{${key}}}`
-  );
+  return text.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+    const k = key.trim();
+    return tokens[k] !== undefined ? (tokens[k] || 'TBC') : `{{${k}}}`;
+  });
 }
 
 function addTitleBlock() {
@@ -4169,7 +4298,7 @@ function addTitleBlock() {
   const scale        = T('{{sheet.scale}}')    || '—';
   const drawnBy      = T('{{drawn.by}}')       || '—';
   const checkedBy    = T('{{checked.by}}')     || '—';
-  const revision     = T('{{revision}}')       || '—';
+  const revision     = T('{{rev}}')       || '—';
   const date         = T('{{date}}');
   const status       = T('{{sheet.status}}');
   const description  = T('{{description}}')    || 'Drawing Description';
@@ -4416,54 +4545,27 @@ function _parseSvgDimMm(attr) {
 }
 
 function _placeSvgOnSheet(svgStr, name, scaleDenom, targetWpx, targetHpx) {
-  // Read authoritative size/scale from the SVG itself (Bonsai writes mm + data-scale)
-  const _el     = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
-  const declWmm = _parseSvgDimMm(_el.getAttribute('width'));
-  const declHmm = _parseSvgDimMm(_el.getAttribute('height'));
-  const dataScale = _el.getAttribute('data-scale');
+  const _el = new DOMParser().parseFromString(svgStr, 'image/svg+xml').documentElement;
+
+  // ── Read authoritative values from SVG line 1 ─────────────────────────────
+  // Bonsai writes width and height in mm and data-scale as "1:NNN".
+  // These override everything — Fabric's computed size, anything sent by Blender.
+  const declWmm   = _parseSvgDimMm(_el.getAttribute('width'));   // e.g. 150mm
+  const declHmm   = _parseSvgDimMm(_el.getAttribute('height'));  // e.g. 100mm
+  const dataScale = _el.getAttribute('data-scale');               // e.g. "1:100"
+
   if (dataScale && dataScale.includes(':')) {
     const parsed = parseInt(dataScale.split(':')[1]);
     if (!isNaN(parsed)) scaleDenom = parsed;
   }
-  // Override passed-in target size when SVG declares explicit mm dimensions
-  if (declWmm > 0) targetWpx = declWmm * R;
-  if (declHmm > 0) targetHpx = declHmm * R;
 
-  // Use blob URL — avoids Fabric.js SVG parser hanging on complex Bonsai SVGs
-  try {
-    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url  = URL.createObjectURL(blob);
-    fabric.Image.fromURL(url, (img) => {
-      URL.revokeObjectURL(url);
-      if (!img || !img.width) {
-        console.error('[Dasu] Blob image load failed, trying loadSVGFromString');
-        _placeSvgFabric(svgStr, name, scaleDenom, declWmm, targetWpx, targetHpx);
-        return;
-      }
-      const { wPx, hPx } = sheetDim();
-      const sc = Math.min(targetWpx / img.width, targetHpx / img.height) || 1;
-      img.set({ scaleX: sc, scaleY: sc,
-                left: (wPx - img.getScaledWidth())  / 2,
-                top:  (hPx - img.getScaledHeight()) / 2,
-                _annotType: 'drawing', _fromBridge: true, _fileName: name,
-                _drawingScale: scaleDenom, _rawSvg: svgStr, _isBonsaiSvg: true });
-      canvas.add(img);
-      canvas.setActiveObject(img);
-      canvas.requestRenderAll();
-      syncProps(img);
-      _showBridgeToast(name, scaleDenom, null);
-    }, { crossOrigin: 'anonymous' });
-  } catch(e) {
-    console.error('[Dasu] Blob approach error:', e);
-    _placeSvgFabric(svgStr, name, scaleDenom, declWmm, targetWpx, targetHpx);
-  }
-}
-
-function _placeSvgFabric(svgStr, name, scaleDenom, declWmm, targetWpx, targetHpx) {
   fabric.loadSVGFromString(svgStr, (objs, opts) => {
-    if (!objs || objs.length === 0) { console.error('[Dasu] Fabric SVG parse returned 0 objects'); return; }
+    if (!objs || objs.length === 0) return;
     const grp = fabric.util.groupSVGElements(objs, opts);
 
+    // Force element to exactly the declared mm size.
+    // sc corrects whatever internal scale Fabric applied when loading the SVG.
+    // After this: grp.getScaledWidth() = declWmm × R canvas px = declWmm mm on sheet.
     if (declWmm > 0 && grp.width > 0) {
       const sc = (declWmm * R) / grp.width;
       grp.set({ scaleX: sc, scaleY: sc });
@@ -7365,18 +7467,29 @@ function sheetCtxProperties() {
   const s    = _sheets[_sheetCtxIdx];
   const meta = s.meta || {};
 
-  // Populate fields
-  document.getElementById('sp-name').value        = s.name          || '';
-  document.getElementById('sp-id').value          = meta.id         || '';
-  document.getElementById('sp-description').value = meta.description|| '';
-  document.getElementById('sp-scale').value       = meta.scale      || '';
-  document.getElementById('sp-status').value      = meta.status     || 'DRAFT';
-  document.getElementById('sp-revision').value    = meta.revision   || '';
-  document.getElementById('sp-issuedate').value   = meta.issueDate  || '';
-  document.getElementById('sp-purpose').value     = meta.purpose    || '';
-  document.getElementById('sp-drawnby').value     = meta.drawnBy    || '';
-  document.getElementById('sp-checkedby').value   = meta.checkedBy  || '';
-  document.getElementById('sp-discipline').value  = meta.discipline || '';
+  // Project info — global, from _bonsaiMeta
+  document.getElementById('sp-project-name').value   = _bonsaiMeta.projectName    || '';
+  document.getElementById('sp-project-number').value = _bonsaiMeta.projectNumber  || '';
+  document.getElementById('sp-site-name').value      = _bonsaiMeta.siteName       || '';
+  document.getElementById('sp-client-name').value    = _bonsaiMeta.clientName     || '';
+  document.getElementById('sp-architect-name').value = _bonsaiMeta.architectName  || '';
+
+  // Sheet-level fields
+  document.getElementById('sp-name').value        = s.name              || '';
+  document.getElementById('sp-id').value          = meta.id             || '';
+  document.getElementById('sp-description').value = meta.description    || '';
+  document.getElementById('sp-scale').value       = meta.scale          || '';
+  document.getElementById('sp-scope').value       = meta.scope          || '';
+  document.getElementById('sp-status').value      = meta.status         || 'DRAFT';
+  document.getElementById('sp-revision').value    = meta.revision       || '';
+  document.getElementById('sp-issuedate').value   = meta.issueDate      || '';
+  document.getElementById('sp-purpose').value     = meta.purpose        || '';
+  document.getElementById('sp-intendeduse').value = meta.intendedUse    || '';
+  document.getElementById('sp-validfrom').value   = meta.validFrom      || '';
+  document.getElementById('sp-validuntil').value  = meta.validUntil     || '';
+  document.getElementById('sp-drawnby').value     = meta.drawnBy        || '';
+  document.getElementById('sp-checkedby').value   = meta.checkedBy      || '';
+  document.getElementById('sp-discipline').value  = meta.discipline     || '';
 
   // Store which sheet we're editing
   document.getElementById('modal-sheet-props').dataset.sheetIdx = _sheetCtxIdx;
@@ -7389,6 +7502,13 @@ function applySheetProperties() {
   const s   = _sheets[idx];
   if (!s) return;
 
+  // Update global project info in _bonsaiMeta
+  _bonsaiMeta.projectName   = document.getElementById('sp-project-name').value.trim();
+  _bonsaiMeta.projectNumber = document.getElementById('sp-project-number').value.trim();
+  _bonsaiMeta.siteName      = document.getElementById('sp-site-name').value.trim();
+  _bonsaiMeta.clientName    = document.getElementById('sp-client-name').value.trim();
+  _bonsaiMeta.architectName = document.getElementById('sp-architect-name').value.trim();
+
   // Update sheet name
   const newName = document.getElementById('sp-name').value.trim() || s.name;
   s.name = newName;
@@ -7398,10 +7518,14 @@ function applySheetProperties() {
     id:          document.getElementById('sp-id').value.trim(),
     description: document.getElementById('sp-description').value.trim(),
     scale:       document.getElementById('sp-scale').value.trim(),
+    scope:       document.getElementById('sp-scope').value.trim(),
     status:      document.getElementById('sp-status').value,
     revision:    document.getElementById('sp-revision').value.trim(),
     issueDate:   document.getElementById('sp-issuedate').value,
     purpose:     document.getElementById('sp-purpose').value.trim(),
+    intendedUse: document.getElementById('sp-intendeduse').value.trim(),
+    validFrom:   document.getElementById('sp-validfrom').value,
+    validUntil:  document.getElementById('sp-validuntil').value,
     drawnBy:     document.getElementById('sp-drawnby').value.trim(),
     checkedBy:   document.getElementById('sp-checkedby').value.trim(),
     discipline:  document.getElementById('sp-discipline').value,
@@ -7432,10 +7556,48 @@ function sheetCtxDelete() {
 // ── Title block refresh ───────────────────────────────────────────────────────
 // Finds all title block objects on the active sheet and regenerates them
 // in place preserving position, scale, and angle.
+// SVG asset title blocks (have _rawSvg + _assetId) are re-resolved from raw SVG.
+// Built-in programmatic title blocks are regenerated from scratch.
 
 function _refreshTitleBlocks() {
   const tbs = canvas.getObjects().filter(o => o._isTitleBlock);
   if (!tbs.length) return;
+
+  // ── SVG asset title blocks ─────────────────────────────────────────────────
+  tbs.filter(o => o._rawSvg).forEach(old => {
+    const savedLeft   = old.left;
+    const savedTop    = old.top;
+    const savedScaleX = old.scaleX;
+    const savedScaleY = old.scaleY;
+    const savedAngle  = old.angle;
+    const rawSvg      = old._rawSvg;
+    const assetId     = old._assetId;
+    const fileName    = old._fileName;
+
+    const resolvedSvg = _resolveTokensInSvg(rawSvg);
+    canvas.remove(old);
+
+    fabric.loadSVGFromString(resolvedSvg, (objs, opts) => {
+      if (!objs || !objs.length) return;
+      const grp = fabric.util.groupSVGElements(objs, opts);
+      grp.set({
+        left: savedLeft, top: savedTop,
+        scaleX: savedScaleX, scaleY: savedScaleY, angle: savedAngle,
+      });
+      grp._isTitleBlock = true;
+      grp._rawSvg       = rawSvg;    // keep unresolved original
+      grp._assetId      = assetId;
+      grp._fileName     = fileName;
+      grp._annotType    = 'drawing';
+      canvas.add(grp);
+      canvas.requestRenderAll();
+      canvas.sendToBack(sheetRect);
+    });
+  });
+
+  // ── Built-in programmatic title blocks (no _rawSvg) ───────────────────────
+  const builtIn = tbs.filter(o => !o._rawSvg);
+  if (!builtIn.length) return;
 
   const { wPx, hPx } = sheetDim();
   const tW = 180 * R, tH = 50 * R;
@@ -7459,7 +7621,7 @@ function _refreshTitleBlocks() {
   const scale       = T('{{sheet.scale}}')    || '—';
   const drawnBy     = T('{{drawn.by}}')       || '—';
   const checkedBy   = T('{{checked.by}}')     || '—';
-  const revision    = T('{{revision}}')       || '—';
+  const revision    = T('{{rev}}')       || '—';
   const date        = T('{{date}}');
   const status      = T('{{sheet.status}}');
   const description = T('{{description}}')    || 'Drawing Description';
@@ -7517,7 +7679,7 @@ function _refreshTitleBlocks() {
         font-family="Arial" font-size="${fs}" font-weight="bold" fill="#222">${revision}</text>
 </svg>`;
 
-  tbs.forEach(old => {
+  builtIn.forEach(old => {
     const savedLeft   = old.left;
     const savedTop    = old.top;
     const savedScaleX = old.scaleX;
@@ -7616,16 +7778,22 @@ function _switchSheet(idx) {
 
 function _blankMeta() {
   return {
-    id:          '',        // sheet number e.g. A-001
-    description: '',        // brief content description
-    scale:       '',        // primary scale e.g. 1:100
-    status:      'DRAFT',   // DRAFT | FOR REVIEW | FOR CONSTRUCTION | FOR CONSENT | AS-BUILT | SUPERSEDED
-    revision:    '',        // A, B, C…
-    issueDate:   '',        // date last issued
-    drawnBy:     '',        // person/org
-    checkedBy:   '',        // checker
-    purpose:     '',        // Consent | Construction | As-built
-    discipline:  '',        // Architecture | Structure | Services
+    // ── Bonsai IfcDocumentInformation fields ──────────────────────────────
+    id:          '',      // {{Identification}} — sheet number e.g. A-001
+    description: '',      // {{Description}}
+    scale:       '',      // {{Scale}} manual override
+    status:      'DRAFT', // {{Status}}
+    revision:    '',      // {{Revision}}
+    purpose:     '',      // {{Purpose}} — Consent | Construction | As-built
+    intendedUse: '',      // {{IntendedUse}} — intended audience / use
+    scope:       '',      // {{Scope}} — project scope or discipline group
+    issueDate:   '',      // {{LastRevisionTime}} / {{IssueDate}}
+    validFrom:   '',      // {{ValidFrom}}
+    validUntil:  '',      // {{ValidUntil}}
+    // ── Dasu additional ───────────────────────────────────────────────────
+    drawnBy:     '',      // {{DrawnBy}}
+    checkedBy:   '',      // {{CheckedBy}}
+    discipline:  '',      // {{Discipline}}
   };
 }
 
